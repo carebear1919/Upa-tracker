@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Renta - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#002114",
+                      "outline-variant": "#bfc9c1",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed": "#410007",
+                      "outline": "#707973",
+                      "on-primary-container": "#a8e7c5",
+                      "surface-dim": "#dbdad7",
+                      "primary": "#0f5238",
+                      "on-tertiary-fixed-variant": "#394d00",
+                      "surface-container-high": "#e9e8e5",
+                      "inverse-surface": "#2f312f",
+                      "on-tertiary-container": "#c4e771",
+                      "on-surface": "#1a1c1a",
+                      "surface-variant": "#e3e2e0",
+                      "on-surface-variant": "#404943",
+                      "secondary-fixed": "#ffdad8",
+                      "surface-container-highest": "#e3e2e0",
+                      "secondary": "#a7373b",
+                      "surface-container": "#efeeeb",
+                      "surface": "#faf9f6",
+                      "tertiary-fixed-dim": "#b0d360",
+                      "tertiary-fixed": "#ccf078",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#861f25",
+                      "primary-container": "#2d6a4f",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#151f00",
+                      "primary-fixed": "#b1f0ce",
+                      "secondary-container": "#ff7a7a",
+                      "on-primary": "#ffffff",
+                      "inverse-primary": "#95d4b3",
+                      "on-background": "#1a1c1a",
+                      "on-error": "#ffffff",
+                      "error": "#ba1a1a",
+                      "background": "#faf9f6",
+                      "surface-container-low": "#f4f3f1",
+                      "inverse-on-surface": "#f2f1ee",
+                      "error-container": "#ffdad6",
+                      "surface-bright": "#faf9f6",
+                      "surface-tint": "#2c694e",
+                      "primary-fixed-dim": "#95d4b3",
+                      "on-secondary-container": "#74101a",
+                      "tertiary-container": "#4e6800",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#3a4e00",
+                      "secondary-fixed-dim": "#ffb3b0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "tap-target-min": "48px",
+                      "gutter": "16px",
+                      "container-padding": "24px",
+                      "unit": "8px",
+                      "stack-gap": "20px"
+              },
+              "fontFamily": {
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        
+        /* Soft paper card style */
+        .paper-card {
+            background-color: #FFFFFF;
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 px-gutter w-full fixed top-0 z-50 bg-surface shadow-sm">
+<div class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Renta</div>
+<div class="flex gap-4 items-center">
+<button class="hover:bg-surface-container-high transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[800px] mx-auto pt-24 px-container-padding">
+<div class="mb-stack-gap">
+<h1 class="font-headline-md text-headline-md text-on-surface mb-2">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your account security and reminder preferences.</p>
+</div>
+<div class="space-y-stack-gap">
+<!-- Security Section -->
+<section class="paper-card p-container-padding flex flex-col gap-unit">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Security</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Keep your account safe by updating your PIN.</p>
+<button class="w-full md:w-auto h-tap-target-min min-h-[56px] px-6 bg-surface-container-low border-2 border-outline-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="lock_reset">lock_reset</span>
+<span class="font-label-lg text-label-lg text-on-surface">Change my PIN</span>
+</button>
+</section>
+<!-- Reminders Section -->
+<section class="paper-card p-container-padding flex flex-col gap-unit">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">How to send reminders</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Choose how you want to be notified about important dates.</p>
+<!-- Options -->
+<div class="flex flex-col gap-4">
+<!-- Messenger Option -->
+<label class="flex items-center gap-4 p-4 border-2 border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-lowest transition-colors min-h-[64px]">
+<input checked="" class="w-6 h-6 text-primary focus:ring-primary border-outline" name="reminder_method" type="radio"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Send via Messenger</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Connected</span>
+</div>
+</label>
+<!-- Text Message Option -->
+<label class="flex items-center gap-4 p-4 border-2 border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-lowest transition-colors min-h-[64px]">
+<input class="w-6 h-6 text-primary focus:ring-primary border-outline" name="reminder_method" type="radio"/>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Send via Text Message</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Phone: 555-0123</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Save Action -->
+<div class="pt-8 flex justify-center md:justify-end">
+<button class="w-full md:w-auto h-tap-target-min min-h-[56px] px-8 bg-primary text-on-primary rounded-lg flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-lg active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+<span class="font-label-lg text-label-lg">Save Changes</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Hidden on Settings due to transactional/focus nature) -->
+<!-- Navigation shell suppressed for this sub-page to prioritize content canvas -->
+<!-- Footer -->
+<footer class="w-full flex flex-col items-center gap-unit py-8 px-container-padding bg-surface-container-low border-t-2 border-outline-variant mt-16">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface-variant mb-2">Renta</div>
+<div class="flex gap-6 mb-4">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80 hover:opacity-100">© 2024 Renta Management. Simple &amp; Secure.</p>
+</footer>
+</body></html>

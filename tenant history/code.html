@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tenant Detail / Payment History - Renta</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#002114",
+                      "outline-variant": "#bfc9c1",
+                      "on-primary-fixed-variant": "#0e5138",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed": "#410007",
+                      "outline": "#707973",
+                      "on-primary-container": "#a8e7c5",
+                      "surface-dim": "#dbdad7",
+                      "primary": "#0f5238",
+                      "on-tertiary-fixed-variant": "#394d00",
+                      "surface-container-high": "#e9e8e5",
+                      "inverse-surface": "#2f312f",
+                      "on-tertiary-container": "#c4e771",
+                      "on-surface": "#1a1c1a",
+                      "surface-variant": "#e3e2e0",
+                      "on-surface-variant": "#404943",
+                      "secondary-fixed": "#ffdad8",
+                      "surface-container-highest": "#e3e2e0",
+                      "secondary": "#a7373b",
+                      "surface-container": "#efeeeb",
+                      "surface": "#faf9f6",
+                      "tertiary-fixed-dim": "#b0d360",
+                      "tertiary-fixed": "#ccf078",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#861f25",
+                      "primary-container": "#2d6a4f",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#151f00",
+                      "primary-fixed": "#b1f0ce",
+                      "secondary-container": "#ff7a7a",
+                      "on-primary": "#ffffff",
+                      "inverse-primary": "#95d4b3",
+                      "on-background": "#1a1c1a",
+                      "on-error": "#ffffff",
+                      "error": "#ba1a1a",
+                      "background": "#faf9f6",
+                      "surface-container-low": "#f4f3f1",
+                      "inverse-on-surface": "#f2f1ee",
+                      "error-container": "#ffdad6",
+                      "surface-bright": "#faf9f6",
+                      "surface-tint": "#2c694e",
+                      "primary-fixed-dim": "#95d4b3",
+                      "on-secondary-container": "#74101a",
+                      "tertiary-container": "#4e6800",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#3a4e00",
+                      "secondary-fixed-dim": "#ffb3b0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "tap-target-min": "48px",
+                      "gutter": "16px",
+                      "container-padding": "24px",
+                      "unit": "8px",
+                      "stack-gap": "20px"
+              },
+              "fontFamily": {
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased h-full">
+<!-- Header (Specific to this screen, replacing global app bar) -->
+<header class="bg-surface dark:bg-surface-dim shadow-sm flex items-center h-16 px-gutter w-full sticky top-0 z-50">
+<button aria-label="Go back" class="h-tap-target-min w-tap-target-min flex items-center justify-center mr-4">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-grow">
+<h1 class="font-headline-md text-headline-md text-primary">Tenant Details</h1>
+</div>
+<button aria-label="More options" class="h-tap-target-min w-tap-target-min flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-[800px] mx-auto px-container-padding py-8 pb-32">
+<!-- Tenant Profile Card -->
+<section class="bg-surface-container-lowest rounded-xl shadow-lg p-6 mb-stack-gap flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-4 bg-surface-variant flex items-center justify-center">
+<img alt="Alice Johnson Portrait" class="w-full h-full object-cover" data-alt="A brightly lit, professional portrait photography headshot of an elderly woman, Alice Johnson, smiling warmly. She is wearing a soft beige knit sweater. The background is a slightly blurred, light cream living room interior, matching the overall Renta app light mode aesthetic. Soft, natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBV8KGu24jeE-hNuHqAgIrmAx_M_TRdNwV2UXrEMByQ2DRQuGf7rPQklAWBg_eko0xlEKPSBH5uXw5TaVfbnowACj4BQbDmP0BMN7raK4xhTHJy8emJTQdATzy1JCYjzePeLdf1DDAXkurJvWjEM72Z_mS77MHIMCFqJdw6Xejofn7RnFYbdnNm2dmhZDpR_AHuyj3ytdASey8fgEzdO7tZFgGGrXD5NN4SFOK1c_F1vWw1smOkc0es"/>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-2">Alice Johnson</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="apartment">apartment</span>
+                Unit 4B - Oakwood Apts
+            </p>
+<div class="flex gap-4 mt-6 w-full max-w-sm">
+<button class="flex-1 bg-surface-container-high hover:bg-surface-variant text-on-surface rounded-lg py-3 flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+<span class="font-label-lg text-label-lg">Call</span>
+</button>
+<button class="flex-1 bg-surface-container-high hover:bg-surface-variant text-on-surface rounded-lg py-3 flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+<span class="font-label-lg text-label-lg">Email</span>
+</button>
+</div>
+</section>
+<!-- Payment History List -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Payment History</h3>
+<span class="font-body-md text-body-md text-on-surface-variant">2023</span>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Payment Item 1 -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-4 min-h-[64px] flex items-center justify-between border border-outline-variant/30 cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg text-on-surface">Oct 1st</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Monthly Rent</div>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+<div class="font-headline-md text-headline-md text-on-surface">$1,200</div>
+<div class="bg-primary text-on-primary font-label-md text-label-md px-3 py-1 rounded-full uppercase mt-1">Paid</div>
+</div>
+</div>
+<!-- Payment Item 2 -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-4 min-h-[64px] flex items-center justify-between border border-outline-variant/30 cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg text-on-surface">Sept 1st</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Monthly Rent</div>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+<div class="font-headline-md text-headline-md text-on-surface">$1,200</div>
+<div class="bg-primary text-on-primary font-label-md text-label-md px-3 py-1 rounded-full uppercase mt-1">Paid</div>
+</div>
+</div>
+<!-- Payment Item 3 -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-4 min-h-[64px] flex items-center justify-between border border-outline-variant/30 cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+</div>
+<div>
+<div class="font-label-lg text-label-lg text-on-surface">Aug 1st</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Monthly Rent</div>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+<div class="font-headline-md text-headline-md text-on-surface">$1,200</div>
+<div class="bg-primary text-on-primary font-label-md text-label-md px-3 py-1 rounded-full uppercase mt-1">Paid</div>
+</div>
+</div>
+<!-- Load More / Full History -->
+<button class="w-full py-4 text-center text-primary font-label-lg text-label-lg hover:bg-surface-container-high rounded-lg transition-colors mt-2">
+                    View Older Payments
+                </button>
+</div>
+</section>
+</main>
+<!-- Fixed Action Area (Log Payment) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 p-container-padding shadow-[0_-4px_16px_rgba(0,0,0,0.05)] z-40">
+<div class="max-w-[800px] mx-auto">
+<button class="w-full bg-primary text-on-primary h-14 rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary-container-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                Log a payment
+            </button>
+</div>
+</div>
+</body></html>

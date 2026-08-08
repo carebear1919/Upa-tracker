@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Renta - Reminders</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#95d4b3",
+                        "on-primary-fixed-variant": "#0e5138",
+                        "tertiary-fixed": "#ccf078",
+                        "secondary-fixed": "#ffdad8",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#a8e7c5",
+                        "secondary": "#a7373b",
+                        "background": "#faf9f6",
+                        "surface-container-low": "#f4f3f1",
+                        "tertiary-fixed-dim": "#b0d360",
+                        "secondary-container": "#ff7a7a",
+                        "inverse-surface": "#2f312f",
+                        "primary-fixed": "#b1f0ce",
+                        "inverse-on-surface": "#f2f1ee",
+                        "surface-dim": "#dbdad7",
+                        "primary-container": "#2d6a4f",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb3b0",
+                        "on-tertiary-fixed-variant": "#394d00",
+                        "outline-variant": "#bfc9c1",
+                        "tertiary-container": "#4e6800",
+                        "on-primary-fixed": "#002114",
+                        "primary": "#0f5238",
+                        "on-secondary-fixed-variant": "#861f25",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#efeeeb",
+                        "surface-bright": "#faf9f6",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "error": "#ba1a1a",
+                        "surface": "#faf9f6",
+                        "surface-tint": "#2c694e",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#74101a",
+                        "surface-container-high": "#e9e8e5",
+                        "on-background": "#1a1c1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#c4e771",
+                        "primary-fixed-dim": "#95d4b3",
+                        "on-surface-variant": "#404943",
+                        "on-secondary-fixed": "#410007",
+                        "on-surface": "#1a1c1a",
+                        "on-tertiary-fixed": "#151f00",
+                        "tertiary": "#3a4e00",
+                        "outline": "#707973"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "tap-target-min": "48px",
+                        "container-padding": "24px",
+                        "stack-gap": "20px",
+                        "unit": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "label-lg": ["Inter", "sans-serif"],
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-md": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["16px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface shadow-sm docked full-width top-0 sticky z-50 hidden md:block">
+<div class="flex justify-between items-center px-container-padding py-4 w-full max-w-[800px] mx-auto">
+<div class="font-headline-md text-headline-md text-primary font-bold">
+                Renta
+            </div>
+<nav class="flex gap-stack-gap">
+<a class="text-on-surface-variant pb-2 hover:bg-surface-container-low transition-colors px-2 py-1 rounded-lg" href="#">Home</a>
+<a class="text-on-surface-variant pb-2 hover:bg-surface-container-low transition-colors px-2 py-1 rounded-lg" href="#">Tenants</a>
+<a class="text-on-surface-variant pb-2 hover:bg-surface-container-low transition-colors px-2 py-1 rounded-lg" href="#">Reports</a>
+<a aria-current="page" class="text-primary border-b-4 border-primary font-bold pb-2 hover:bg-surface-container-low transition-colors px-2 py-1 rounded-t-lg" href="#">Reminders</a>
+</nav>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-full hover:bg-primary-container hover:text-on-primary-container transition-colors min-h-tap-target-min flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'FILL' 0;">add</span>
+                Add New
+            </button>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center px-container-padding py-8 w-full max-w-[800px] mx-auto gap-stack-gap">
+<div class="w-full mb-6">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-2">Upcoming Reminders</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your upcoming rent collections and tenant communications.</p>
+</div>
+<!-- Overdue Item -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex items-start gap-4">
+<div aria-label="Overdue" class="w-4 h-4 rounded-full bg-error mt-2 flex-shrink-0"></div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">Sarah Jenkins</h2>
+<p class="font-body-md text-body-md text-error font-medium">Overdue: Due on Oct 1st</p>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Apt 4B - $1,200</p>
+<div class="flex items-center gap-2 mt-3 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">sms</span> Sends via Text Message
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="flex-1 sm:flex-none bg-secondary text-on-secondary font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+<span class="material-symbols-outlined" data-icon="chat" style="font-variation-settings: 'FILL' 1;">chat</span>
+                    Send Message
+                </button>
+<button class="flex-1 sm:flex-none border-2 border-outline text-on-surface font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 0;">check_circle</span>
+                    Mark as Paid
+                </button>
+</div>
+</div>
+<!-- Upcoming Item -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex items-start gap-4">
+<div aria-label="Upcoming" class="w-4 h-4 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">Michael Chen</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Due on Oct 5th</p>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Unit 12 - $950</p>
+<div class="flex items-center gap-2 mt-3 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">mail</span> Sends via Email
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="flex-1 sm:flex-none border-2 border-outline text-on-surface font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="chat" style="font-variation-settings: 'FILL' 0;">chat</span>
+                    Message
+                </button>
+<button class="flex-1 sm:flex-none bg-primary text-on-primary font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Mark Paid
+                </button>
+</div>
+</div>
+<!-- Upcoming Item 2 -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex items-start gap-4">
+<div aria-label="Upcoming" class="w-4 h-4 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">Amanda Rodriguez</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Due on Oct 7th</p>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">House 3 - $2,100</p>
+<div class="flex items-center gap-2 mt-3 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">forum</span> Sends via Messenger
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="flex-1 sm:flex-none border-2 border-outline text-on-surface font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="chat" style="font-variation-settings: 'FILL' 0;">chat</span>
+                    Message
+                </button>
+<button class="flex-1 sm:flex-none bg-primary text-on-primary font-label-lg text-label-lg px-6 py-4 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    Mark Paid
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-container-lowest shadow-[0_-4px_16px_rgba(0,0,0,0.05)] docked full-width bottom-0 z-50 fixed bottom-0 w-full flex justify-around items-center p-4 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-6 py-2 hover:bg-surface-container-high active:scale-90 transition-transform duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-lg text-label-lg">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-6 py-2 hover:bg-surface-container-high active:scale-90 transition-transform duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-label-lg text-label-lg">Tenants</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-6 py-2 hover:bg-surface-container-high active:scale-90 transition-transform duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="assessment">assessment</span>
+<span class="font-label-lg text-label-lg">Reports</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-6 py-2 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-label-lg text-label-lg">Reminders</span>
+</a>
+</nav>
+</body></html>

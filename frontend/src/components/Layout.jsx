@@ -1,0 +1,101 @@
+import { useState } from 'react'
+import { NavLink, Outlet } from 'react-router-dom'
+import Icon from './Icon.jsx'
+
+const navItems = [
+  { to: '/', label: 'Home', icon: 'home', end: true },
+  { to: '/tenants', label: 'Tenants', icon: 'group' },
+  { to: '/reports', label: 'Reports', icon: 'assessment' },
+  { to: '/reminders', label: 'Reminders', icon: 'notifications' },
+  { to: '/settings', label: 'Settings', icon: 'settings' },
+]
+
+const COLLAPSE_KEY = 'renta-sidebar-collapsed'
+
+export default function Layout() {
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1')
+
+  function toggle() {
+    setCollapsed((c) => {
+      localStorage.setItem(COLLAPSE_KEY, c ? '0' : '1')
+      return !c
+    })
+  }
+
+  return (
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <aside
+        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 bg-surface border-r border-surface-variant gap-8 z-40 transition-[width] duration-200 ${
+          collapsed ? 'md:w-20 p-3' : 'md:w-60 p-6'
+        }`}
+      >
+        <div className={`flex items-center ${collapsed ? 'flex-col gap-3' : 'justify-between'}`}>
+          <NavLink to="/" className="flex items-center gap-2 min-w-0" title="Renta">
+            <Icon name="home" className="text-primary text-[28px] flex-shrink-0" />
+            {!collapsed && <span className="font-bold text-2xl text-primary truncate">Renta</span>}
+          </NavLink>
+          <button
+            onClick={toggle}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors flex-shrink-0"
+          >
+            <Icon name={collapsed ? 'chevron_right' : 'chevron_left'} className="text-[20px]" />
+          </button>
+        </div>
+        <nav className="flex flex-col gap-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              title={item.label}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
+                  collapsed ? 'justify-center px-0' : ''
+                } ${
+                  isActive
+                    ? 'bg-primary-container text-on-primary-container'
+                    : 'text-on-surface-variant hover:bg-surface-container-high'
+                }`
+              }
+            >
+              <Icon name={item.icon} className="text-[22px] flex-shrink-0" />
+              {!collapsed && item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+
+      <header className="md:hidden w-full bg-surface border-b border-surface-variant sticky top-0 z-50 flex items-center px-4 py-3">
+        <NavLink to="/" className="flex items-center gap-2">
+          <Icon name="home" className="text-primary text-[28px]" />
+          <span className="font-bold text-xl text-primary">Renta</span>
+        </NavLink>
+      </header>
+
+      <div className={`flex-1 flex flex-col pb-20 md:pb-0 transition-[margin] duration-200 ${collapsed ? 'md:ml-20' : 'md:ml-60'}`}>
+        <main className="w-full flex flex-col gap-stack-gap px-4 md:px-container-padding py-6 md:py-8 flex-grow">
+          <Outlet />
+        </main>
+      </div>
+
+      <nav className="fixed bottom-0 w-full flex justify-around items-center py-2 px-1 md:hidden bg-surface-container-lowest shadow-[0_-4px_16px_rgba(0,0,0,0.05)] z-50">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center rounded-xl px-3 py-2 min-h-tap-target-min flex-1 active:scale-90 transition-transform duration-200 ${
+                isActive ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant'
+              }`
+            }
+          >
+            <Icon name={item.icon} className="text-[22px]" />
+            <span className="text-xs font-medium mt-1">{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  )
+}

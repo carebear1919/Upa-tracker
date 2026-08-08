@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Renta - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#95d4b3",
+                        "on-primary-fixed-variant": "#0e5138",
+                        "tertiary-fixed": "#ccf078",
+                        "secondary-fixed": "#ffdad8",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#a8e7c5",
+                        "secondary": "#a7373b",
+                        "background": "#faf9f6",
+                        "surface-container-low": "#f4f3f1",
+                        "tertiary-fixed-dim": "#b0d360",
+                        "secondary-container": "#ff7a7a",
+                        "inverse-surface": "#2f312f",
+                        "primary-fixed": "#b1f0ce",
+                        "inverse-on-surface": "#f2f1ee",
+                        "surface-dim": "#dbdad7",
+                        "primary-container": "#2d6a4f",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb3b0",
+                        "on-tertiary-fixed-variant": "#394d00",
+                        "outline-variant": "#bfc9c1",
+                        "tertiary-container": "#4e6800",
+                        "on-primary-fixed": "#002114",
+                        "primary": "#0f5238",
+                        "on-secondary-fixed-variant": "#861f25",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#efeeeb",
+                        "surface-bright": "#faf9f6",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e3e2e0",
+                        "error": "#ba1a1a",
+                        "surface": "#faf9f6",
+                        "surface-tint": "#2c694e",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#74101a",
+                        "surface-container-high": "#e9e8e5",
+                        "on-background": "#1a1c1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#c4e771",
+                        "primary-fixed-dim": "#95d4b3",
+                        "on-surface-variant": "#404943",
+                        "on-secondary-fixed": "#410007",
+                        "on-surface": "#1a1c1a",
+                        "on-tertiary-fixed": "#151f00",
+                        "tertiary": "#3a4e00",
+                        "outline": "#707973"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "tap-target-min": "48px",
+                        "container-padding": "24px",
+                        "stack-gap": "20px",
+                        "unit": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["16px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "label-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        /* Tonal Layers Shadows */
+        .shadow-level-1 { box-shadow: 0 4px 16px rgba(0,0,0, 0.05); }
+        .shadow-level-2 { box-shadow: 0 8px 24px rgba(0,0,0, 0.08); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full bg-surface dark:bg-on-background border-b border-surface-variant sticky top-0 z-50">
+<div class="flex justify-between items-center px-container-padding py-3 w-full max-w-[800px] mx-auto">
+<div class="flex items-center gap-3">
+<img alt="Renta Logo" class="h-8 w-auto" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed md:font-headline-lg md:text-headline-lg">Renta</div>
+</div>
+<nav class="hidden md:flex gap-gutter items-center">
+<a class="text-primary dark:text-primary-fixed font-bold font-label-lg text-label-lg hover:opacity-80 transition-opacity active:scale-95 duration-150 ease-in-out" href="#">Home</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-label-lg text-label-lg hover:opacity-80 transition-opacity active:scale-95 duration-150 ease-in-out" href="#">Tenants</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-label-lg text-label-lg hover:opacity-80 transition-opacity active:scale-95 duration-150 ease-in-out" href="#">Reports</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-label-lg text-label-lg hover:opacity-80 transition-opacity active:scale-95 duration-150 ease-in-out" href="#">Reminders</a>
+</nav>
+<button class="hidden md:flex items-center justify-center bg-primary text-on-primary w-10 h-10 rounded-full hover:bg-surface-tint transition-colors active:scale-95 duration-150 shadow-level-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full max-w-[800px] flex flex-col gap-stack-gap px-container-padding py-8 flex-grow">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background mb-4">Dashboard</h1>
+<!-- At a Glance Summary -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full">
+<!-- Rent Collected -->
+<div class="bg-surface shadow-level-1 rounded-xl p-6 flex flex-col gap-2">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Rent Collected</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">$4,250</span>
+<div class="w-full bg-surface-container-highest rounded-full h-3 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 75%"></div>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">75% of expected</span>
+</div>
+<!-- Expenses -->
+<div class="bg-surface shadow-level-1 rounded-xl p-6 flex flex-col gap-2">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Expenses</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-secondary">$850</span>
+<div class="w-full bg-surface-container-highest rounded-full h-3 mt-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 30%"></div>
+</div>
+</div>
+<!-- Remaining -->
+<div class="bg-surface shadow-level-1 rounded-xl p-6 flex flex-col gap-2">
+<span class="font-label-lg text-label-lg text-on-surface-variant">Net Balance</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">$3,400</span>
+<span class="font-body-md text-body-md text-on-surface-variant mt-auto pt-2">Available funds</span>
+</div>
+</section>
+<!-- Quick Actions (Mobile Prominent) -->
+<section class="flex flex-col md:flex-row gap-gutter w-full py-4">
+<button class="w-full min-h-tap-target-min flex-1 bg-primary text-on-primary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label-lg text-label-lg">Log Rent</span>
+</button>
+<button class="w-full min-h-tap-target-min flex-1 bg-secondary text-on-secondary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-lg text-label-lg">Add Expense</span>
+</button>
+</section>
+<!-- Need to Pay Section -->
+<section class="flex flex-col gap-4 w-full mt-4">
+<h2 class="font-headline-md text-headline-md text-on-background">Need to Pay</h2>
+<div class="flex flex-col gap-unit">
+<!-- Tenant 1 -->
+<div class="bg-surface shadow-level-1 rounded-xl p-4 min-h-[80px] flex items-center justify-between border-l-4 border-secondary cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Alice Johnson</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Unit 4B - Oakwood Apts</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-lg text-label-lg text-secondary">$1,200</span>
+<span class="bg-secondary text-on-secondary font-label-md text-label-md uppercase px-3 py-1 rounded-full">Due</span>
+</div>
+</div>
+<!-- Tenant 2 -->
+<div class="bg-surface shadow-level-1 rounded-xl p-4 min-h-[80px] flex items-center justify-between border-l-4 border-secondary cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Robert Smith</span>
+<span class="font-body-md text-body-md text-on-surface-variant">123 Elm St House</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-lg text-label-lg text-secondary">$950</span>
+<span class="bg-secondary text-on-secondary font-label-md text-label-md uppercase px-3 py-1 rounded-full">Due</span>
+</div>
+</div>
+<!-- Tenant 3 -->
+<div class="bg-surface shadow-level-1 rounded-xl p-4 min-h-[80px] flex items-center justify-between border-l-4 border-tertiary cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Carol White</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Unit 1A - Pine Apts</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-lg text-label-lg text-tertiary">$1,050</span>
+<span class="bg-tertiary text-on-tertiary font-label-md text-label-md uppercase px-3 py-1 rounded-full">Pending</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center p-4 md:hidden bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_16px_rgba(0,0,0,0.05)] z-50">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-6 py-2 hover:bg-surface-container-high dark:hover:bg-surface-variant active:scale-90 transition-transform duration-200 min-h-tap-target-min" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-6 py-2 hover:bg-surface-container-high dark:hover:bg-surface-variant active:scale-90 transition-transform duration-200 min-h-tap-target-min" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md mt-1">Tenants</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-6 py-2 hover:bg-surface-container-high dark:hover:bg-surface-variant active:scale-90 transition-transform duration-200 min-h-tap-target-min" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-label-md text-label-md mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-6 py-2 hover:bg-surface-container-high dark:hover:bg-surface-variant active:scale-90 transition-transform duration-200 min-h-tap-target-min" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-md text-label-md mt-1">Reminders</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="w-full flex flex-col items-center gap-stack-gap px-container-padding py-8 mt-auto bg-surface-container-low dark:bg-on-background border-t-2 border-outline-variant hidden md:flex">
+<div class="text-label-lg font-bold text-on-surface">Renta</div>
+<div class="flex gap-gutter">
+<a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-error transition-colors cursor-pointer active:opacity-70" href="#">Lock App</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-error transition-colors cursor-pointer active:opacity-70" href="#">Exit Session</a>
+</div>
+</footer>
+</body></html>

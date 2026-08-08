@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Serene Hearth design system — see docs/DESIGN.md sources per screen.
+   Font is a local system-UI stack (no Google Fonts) so both the type and the
+   icons (see components/Icon.jsx) work fully offline, per the PWA spec. */
+@theme {
+  --color-surface: #faf9f6;
+  --color-surface-dim: #dbdad7;
+  --color-surface-bright: #faf9f6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f4f3f1;
+  --color-surface-container: #efeeeb;
+  --color-surface-container-high: #e9e8e5;
+  --color-surface-container-highest: #e3e2e0;
+  --color-on-surface: #1a1c1a;
+  --color-on-surface-variant: #404943;
+  --color-inverse-surface: #2f312f;
+  --color-inverse-on-surface: #f2f1ee;
+  --color-outline: #707973;
+  --color-outline-variant: #bfc9c1;
+  --color-surface-tint: #2c694e;
+  --color-primary: #0f5238;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2d6a4f;
+  --color-on-primary-container: #a8e7c5;
+  --color-inverse-primary: #95d4b3;
+  --color-secondary: #a7373b;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #ff7a7a;
+  --color-on-secondary-container: #74101a;
+  --color-tertiary: #3a4e00;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #4e6800;
+  --color-on-tertiary-container: #c4e771;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-background: #faf9f6;
+  --color-on-background: #1a1c1a;
+  --color-surface-variant: #e3e2e0;
+
+  --font-sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --spacing-unit: 8px;
+  --spacing-container-padding: 24px;
+  --spacing-gutter: 16px;
+  --spacing-tap-target-min: 48px;
+  --spacing-stack-gap: 20px;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-sans);
+}
+
+.shadow-level-1 {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+.shadow-level-2 {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
