@@ -90,7 +90,9 @@ export default function PinLock({ onUnlock }) {
           />
         ))}
       </div>
-      {error && <p className="text-secondary font-medium">{error}</p>}
+      <div className="min-h-6 flex items-center">
+        {error && <p className="text-secondary font-medium">{error}</p>}
+      </div>
       <div className="grid grid-cols-3 gap-4 w-full max-w-xs mt-4">
         {KEYS.map((key, i) => {
           if (key === '') return <div key={i} />
@@ -117,14 +119,16 @@ export default function PinLock({ onUnlock }) {
           )
         })}
       </div>
-      {isFirstRun && pin.length >= MIN_LENGTH && (
-        <button
-          onClick={() => handleComplete(pin)}
-          className="mt-2 px-8 py-3 rounded-full bg-primary text-on-primary font-semibold text-lg hover:bg-primary-container transition-colors"
-        >
-          Done
-        </button>
-      )}
+      <div className="min-h-[52px] mt-2 flex items-center justify-center">
+        {isFirstRun && pin.length >= MIN_LENGTH && (
+          <button
+            onClick={() => handleComplete(pin)}
+            className="px-8 py-3 rounded-full bg-primary text-on-primary font-semibold text-lg hover:bg-primary-container transition-colors"
+          >
+            Done
+          </button>
+        )}
+      </div>
     </div>
   )
 }

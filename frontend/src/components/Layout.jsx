@@ -2,13 +2,32 @@ import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import Icon from './Icon.jsx'
 
-const navItems = [
-  { to: '/', label: 'Home', icon: 'home', end: true },
-  { to: '/tenants', label: 'Tenants', icon: 'group' },
-  { to: '/reports', label: 'Reports', icon: 'assessment' },
-  { to: '/reminders', label: 'Reminders', icon: 'notifications' },
-  { to: '/settings', label: 'Settings', icon: 'settings' },
+const navGroups = [
+  {
+    label: 'Overview',
+    items: [{ to: '/', label: 'Home', icon: 'home', end: true }],
+  },
+  {
+    label: 'Money',
+    items: [
+      { to: '/payments', label: 'Payments', icon: 'payments' },
+      { to: '/reports', label: 'Reports', icon: 'assessment' },
+    ],
+  },
+  {
+    label: 'People',
+    items: [
+      { to: '/tenants', label: 'Tenants', icon: 'group' },
+      { to: '/reminders', label: 'Reminders', icon: 'notifications' },
+    ],
+  },
+  {
+    label: 'App',
+    items: [{ to: '/settings', label: 'Settings', icon: 'settings' }],
+  },
 ]
+
+const navItems = navGroups.flatMap((group) => group.items)
 
 const COLLAPSE_KEY = 'renta-sidebar-collapsed'
 
@@ -25,7 +44,7 @@ export default function Layout() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <aside
-        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 bg-surface border-r border-surface-variant gap-8 z-40 transition-[width] duration-200 ${
+        className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 bg-surface-container-lowest shadow-level-1 border-r border-surface-variant gap-8 z-40 transition-[width] duration-200 ${
           collapsed ? 'md:w-20 p-3' : 'md:w-60 p-6'
         }`}
       >
@@ -42,31 +61,40 @@ export default function Layout() {
             <Icon name={collapsed ? 'chevron_right' : 'chevron_left'} className="text-[20px]" />
           </button>
         </div>
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              title={item.label}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
-                  collapsed ? 'justify-center px-0' : ''
-                } ${
-                  isActive
-                    ? 'bg-primary-container text-on-primary-container'
-                    : 'text-on-surface-variant hover:bg-surface-container-high'
-                }`
-              }
-            >
-              <Icon name={item.icon} className="text-[22px] flex-shrink-0" />
-              {!collapsed && item.label}
-            </NavLink>
+        <nav className="flex flex-col gap-4">
+          {navGroups.map((group) => (
+            <div key={group.label} className="flex flex-col gap-1">
+              {!collapsed && (
+                <span className="px-4 text-xs font-bold uppercase tracking-wide text-on-surface-variant/60">
+                  {group.label}
+                </span>
+              )}
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  title={item.label}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
+                      collapsed ? 'justify-center px-0' : ''
+                    } ${
+                      isActive
+                        ? 'bg-primary-container text-on-primary-container'
+                        : 'text-on-surface-variant hover:bg-surface-container-high'
+                    }`
+                  }
+                >
+                  <Icon name={item.icon} className="text-[22px] flex-shrink-0" />
+                  {!collapsed && item.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
       </aside>
 
-      <header className="md:hidden w-full bg-surface border-b border-surface-variant sticky top-0 z-50 flex items-center px-4 py-3">
+      <header className="md:hidden w-full bg-surface-container-lowest shadow-level-1 border-b border-surface-variant sticky top-0 z-50 flex items-center px-4 py-3">
         <NavLink to="/" className="flex items-center gap-2">
           <Icon name="home" className="text-primary text-[28px]" />
           <span className="font-bold text-xl text-primary">Renta</span>
@@ -86,13 +114,13 @@ export default function Layout() {
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center rounded-xl px-3 py-2 min-h-tap-target-min flex-1 active:scale-90 transition-transform duration-200 ${
+              `flex flex-col items-center justify-center rounded-xl px-1 py-2 min-h-tap-target-min flex-1 active:scale-90 transition-transform duration-200 ${
                 isActive ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant'
               }`
             }
           >
-            <Icon name={item.icon} className="text-[22px]" />
-            <span className="text-xs font-medium mt-1">{item.label}</span>
+            <Icon name={item.icon} className="text-[20px]" />
+            <span className="text-[10px] font-medium mt-1 leading-tight">{item.label}</span>
           </NavLink>
         ))}
       </nav>

@@ -1,11 +1,19 @@
-import { daysUntilDue, dueUrgency, dueLabel, URGENCY_STYLES } from '../lib/store.js'
+import { daysUntilDue, dueUrgency, dueLabel } from '../lib/store.js'
+import Chip from './Chip.jsx'
+
+const URGENCY_TONE = {
+  overdue: 'secondary',
+  today: 'secondary',
+  soon: 'tertiary',
+  later: 'neutral',
+}
 
 export default function DueBadge({ dueDay }) {
   const diff = daysUntilDue(dueDay)
   const urgency = dueUrgency(diff)
   return (
-    <span className={`text-sm font-semibold uppercase px-3 py-1 rounded-full whitespace-nowrap ${URGENCY_STYLES[urgency]}`}>
+    <Chip tone={URGENCY_TONE[urgency]} size="md">
       {dueLabel(diff)}
-    </span>
+    </Chip>
   )
 }

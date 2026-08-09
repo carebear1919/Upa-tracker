@@ -4,7 +4,7 @@
    Font is a local system-UI stack (no Google Fonts) so both the type and the
    icons (see components/Icon.jsx) work fully offline, per the PWA spec. */
 @theme {
-  --color-surface: #faf9f6;
+  --color-surface: #f0ede4;
   --color-surface-dim: #dbdad7;
   --color-surface-bright: #faf9f6;
   --color-surface-container-lowest: #ffffff;
@@ -36,7 +36,7 @@
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
-  --color-background: #faf9f6;
+  --color-background: #f0ede4;
   --color-on-background: #1a1c1a;
   --color-surface-variant: #e3e2e0;
 
@@ -66,8 +66,8 @@ body {
 }
 
 .shadow-level-1 {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(26, 28, 26, 0.06), 0 6px 20px rgba(26, 28, 26, 0.1);
 }
 .shadow-level-2 {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(26, 28, 26, 0.1), 0 10px 28px rgba(26, 28, 26, 0.14);
 }
