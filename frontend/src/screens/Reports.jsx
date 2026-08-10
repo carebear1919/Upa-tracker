@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useStore, db, formatCurrency, startingBalance, EXPENSE_CATEGORIES } from '../lib/store.js'
+import { useStore, db, formatCurrency, startingBalance, EXPENSE_CATEGORIES, paymentStatus } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
@@ -112,6 +112,15 @@ export default function Reports() {
     return acc
   }, {})
 
+  // Full transparency on who's behind, not just who paid — every tenant
+  // shows up here, sorted so unpaid/partial (the ones that need attention)
+  // come before anyone who's already fully paid.
+  const STATUS_RANK = { unpaid: 0, partial: 1, paid: 2 }
+  const tenantStatuses = tenants
+    .map((t) => ({ tenant: t, ...paymentStatus(t, payments, month) }))
+    .sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status])
+  const behindCount = tenantStatuses.filter((x) => x.status !== 'paid').length
+
   function tenantName(id) {
     return tenants.find((t) => t.id === id)?.name ?? 'Unknown tenant'
   }
@@ -152,6 +161,38 @@ export default function Reports() {
     })
 
     let y = doc.lastAutoTable.finalY + 10
+
+    if (tenantStatuses.length > 0) {
+      doc.setFontSize(13)
+      doc.setTextColor(...INK_RGB)
+      doc.text(`Tenant Payment Status${behindCount > 0 ? ` — ${behindCount} not fully paid` : ''}`, margin, y)
+      autoTable(doc, {
+        startY: y + 4,
+        head: [['Tenant', 'Property', 'Status', 'Paid (PHP)', 'Balance (PHP)']],
+        body: tenantStatuses.map(({ tenant, status, paid, balance }) => [
+          tenant.name,
+          tenant.unit ? `Unit ${tenant.unit} - ${tenant.property}` : tenant.property,
+          status === 'paid' ? 'Paid' : status === 'partial' ? 'Partial' : 'Unpaid',
+          paid.toLocaleString(),
+          balance.toLocaleString(),
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: INK_RGB, textColor: 255 },
+        alternateRowStyles: { fillColor: CREAM_RGB },
+        styles: { fontSize: 10 },
+        columnStyles: { 3: { halign: 'right' }, 4: { halign: 'right' } },
+        didParseCell: (data) => {
+          if (data.section === 'body' && data.column.index === 2) {
+            const status = tenantStatuses[data.row.index].status
+            data.cell.styles.fontStyle = 'bold'
+            if (status === 'unpaid') data.cell.styles.textColor = SECONDARY_RGB
+            else if (status === 'partial') data.cell.styles.textColor = [166, 124, 0]
+            else data.cell.styles.textColor = PRIMARY_RGB
+          }
+        },
+      })
+      y = doc.lastAutoTable.finalY + 10
+    }
 
     if (monthPayments.length > 0) {
       doc.setFontSize(13)
@@ -226,6 +267,15 @@ export default function Reports() {
       .map(([label, val]) => `<tr><td style="${totalStyle}">${label}</td><td style="${totalStyle}text-align:right;">${val}</td></tr>`)
       .join('')
 
+    const statusColor = { unpaid: '#a7373b', partial: '#a67c00', paid: '#0f5238' }
+    const statusLabel = { unpaid: 'Unpaid', partial: 'Partial', paid: 'Paid' }
+    const tenantStatusRows = tenantStatuses
+      .map(
+        ({ tenant, status, paid, balance }) =>
+          `<tr><td style="${rowStyle}">${tenant.name}</td><td style="${rowStyle}">${tenant.unit ? `Unit ${tenant.unit} - ` : ''}${tenant.property}</td><td style="${rowStyle}font-weight:bold;color:${statusColor[status]};">${statusLabel[status]}</td><td style="${rowStyle}text-align:right;">${paid}</td><td style="${rowStyle}text-align:right;">${balance}</td></tr>`,
+      )
+      .join('')
+
     const paymentRows = monthPayments
       .map(
         (p) =>
@@ -250,6 +300,10 @@ export default function Reports() {
           <tr><td colspan="4" style="font-family:Calibri;font-size:18px;font-weight:bold;color:#0f5238;padding:8px;">${settings.businessName || 'Renta'} — Monthly Report</td></tr>
           <tr><td colspan="4" style="font-family:Calibri;font-size:13px;color:#404943;padding:0 8px 12px;">${monthLabel(month)}</td></tr>
           ${summaryRows}
+          <tr><td colspan="4" style="padding:8px;"></td></tr>
+          <tr><td colspan="5" style="${sectionStyle}">Tenant Payment Status${behindCount > 0 ? ` — ${behindCount} not fully paid` : ''}</td></tr>
+          <tr><th style="${headStyle}">Tenant</th><th style="${headStyle}">Property</th><th style="${headStyle}">Status</th><th style="${headStyle}">Paid (PHP)</th><th style="${headStyle}">Balance (PHP)</th></tr>
+          ${tenantStatusRows}
           <tr><td colspan="4" style="padding:8px;"></td></tr>
           <tr><td colspan="3" style="${sectionStyle}">Payments (${monthPayments.length})</td></tr>
           <tr><th style="${headStyle}">Date</th><th style="${headStyle}">Tenant</th><th style="${headStyle}">Amount (PHP)</th></tr>
@@ -302,6 +356,35 @@ export default function Reports() {
           <p className="text-on-surface-variant text-sm">No payments or expenses logged for {monthLabel(month)} yet.</p>
         )}
       </Card>
+
+      {tenantStatuses.length > 0 && (
+        <Card className="flex flex-col gap-3 w-full">
+          <SectionHeader
+            title="Tenant Payment Status"
+            icon="group"
+            subtitle={behindCount > 0 ? `${behindCount} tenant${behindCount === 1 ? '' : 's'} not fully paid this month` : "Everyone's paid up this month"}
+          />
+          <div className="flex flex-col gap-2">
+            {tenantStatuses.map(({ tenant, status, balance }) => (
+              <div key={tenant.id} className="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/30 last:border-0">
+                <div className="min-w-0">
+                  <div className="font-semibold text-on-surface truncate">{tenant.name}</div>
+                  <div className="text-sm text-on-surface-variant truncate">
+                    {tenant.unit ? `Unit ${tenant.unit} - ` : ''}
+                    {tenant.property}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {status !== 'paid' && <span className="text-sm text-secondary font-semibold">{formatCurrency(balance)} left</span>}
+                  <Chip tone={status === 'paid' ? 'primary' : status === 'partial' ? 'tertiary' : 'secondary'} size="sm">
+                    {status === 'paid' ? 'Paid' : status === 'partial' ? 'Partial' : 'Unpaid'}
+                  </Chip>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         <button
