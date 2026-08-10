@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import Onboarding from './components/Onboarding.jsx'
 import Login from './screens/Login.jsx'
 import PinLock from './screens/PinLock.jsx'
 import Dashboard from './screens/Dashboard.jsx'
@@ -15,6 +16,7 @@ import Settings from './screens/Settings.jsx'
 import Icon from './components/Icon.jsx'
 import { useStore } from './lib/store.js'
 import { logout } from './lib/supabase.js'
+import { ONBOARDED_KEY } from './components/Onboarding.jsx'
 
 function LoadingScreen() {
   return (
@@ -26,19 +28,18 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  const { settings, loading, authNeeded } = useStore()
+  const { loading, authNeeded } = useStore()
   const [unlocked, setUnlocked] = useState(false)
-
-  // Don't decide the PIN gate off data that hasn't loaded yet (Supabase fetch
-  // is async) — that would either flash the app unlocked or wrongly show the
-  // first-run "create a PIN" screen to a returning user.
-  useEffect(() => {
-    if (!loading && !authNeeded && !settings.pinHash) setUnlocked(true)
-  }, [loading, authNeeded, settings.pinHash])
+  const [onboardingDone, setOnboardingDone] = useState(() => localStorage.getItem(ONBOARDED_KEY) === '1')
 
   async function handleLogout() {
     setUnlocked(false)
     await logout()
+  }
+
+  function finishOnboarding() {
+    localStorage.setItem(ONBOARDED_KEY, '1')
+    setOnboardingDone(true)
   }
 
   if (loading) {
@@ -49,8 +50,18 @@ export default function App() {
     return <Login />
   }
 
+  // PinLock handles both first-run ("create a PIN") and returning-user
+  // ("enter PIN") on its own based on whether settings.pinHash is set — every
+  // account, new or existing, goes through this every time the app opens.
   if (!unlocked) {
     return <PinLock onUnlock={() => setUnlocked(true)} onLogout={handleLogout} />
+  }
+
+  // Shown once per device right after unlocking, until finished or skipped —
+  // covers brand-new accounts (right after creating their PIN) and any
+  // existing account opening the app on a device that hasn't seen it yet.
+  if (!onboardingDone) {
+    return <Onboarding onFinish={finishOnboarding} />
   }
 
   return (

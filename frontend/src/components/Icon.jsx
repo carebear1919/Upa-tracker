@@ -35,6 +35,7 @@ const PATHS = {
   more_vert: <><circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" /></>,
   close: <path d="M18 6L6 18M6 6l12 12" />,
   logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></>,
+  help: <><circle cx="12" cy="12" r="9.5" /><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7" /><path d="M12 17.5h.01" /></>,
 }
 
 export default function Icon({ name, className = '', filled = false }) {

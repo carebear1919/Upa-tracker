@@ -4,6 +4,7 @@ import { hashPin, verifyPin } from '../lib/pin.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Toast, { useToast } from '../components/Toast.jsx'
+import Onboarding from '../components/Onboarding.jsx'
 
 const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
@@ -48,6 +49,7 @@ export default function Settings({ onLock, onLogout }) {
   const [clearError, setClearError] = useState('')
 
   const [openingBalance, setOpeningBalance] = useState(settings.openingBalance ?? 0)
+  const [showGuide, setShowGuide] = useState(false)
 
   function loadSample() {
     db.loadSampleData()
@@ -172,6 +174,21 @@ export default function Settings({ onLock, onLogout }) {
 
         <Card className="flex flex-col gap-2 w-full">
           <h2 className="text-xl font-semibold text-on-surface mb-1 flex items-center gap-2">
+            <Icon name="help" className="text-[22px] text-on-surface-variant" />
+            Help
+          </h2>
+          <p className="text-on-surface-variant mb-2">Forgot how something works? Watch the quick tour again.</p>
+          <button
+            onClick={() => setShowGuide(true)}
+            className="w-full md:w-auto min-h-[56px] px-6 mt-2 bg-surface-container-low border-2 border-outline-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
+          >
+            <Icon name="help" className="text-[22px]" />
+            <span className="font-semibold">View Welcome Guide</span>
+          </button>
+        </Card>
+
+        <Card className="flex flex-col gap-2 w-full">
+          <h2 className="text-xl font-semibold text-on-surface mb-1 flex items-center gap-2">
             <Icon name="table_view" className="text-[22px] text-on-surface-variant" />
             Sample Data
           </h2>
@@ -257,6 +274,7 @@ export default function Settings({ onLock, onLogout }) {
       </div>
 
       <Toast message={toastMsg} />
+      {showGuide && <Onboarding includeBalanceStep={false} onFinish={() => setShowGuide(false)} />}
     </>
   )
 }
