@@ -97,7 +97,7 @@ function monthLabel(month) {
 export default function Reports() {
   const { tenants, payments, expenses, settings } = useStore()
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
-  const [orientation, setOrientation] = useState('portrait')
+  const [choosingOrientation, setChoosingOrientation] = useState(false)
 
   const monthPayments = payments.filter((p) => p.monthCovered === month)
   const monthExpenses = expenses.filter((e) => e.date.startsWith(month))
@@ -117,7 +117,8 @@ export default function Reports() {
   }
 
   // jsPDF's built-in fonts don't include the ₱ glyph, so the PDF spells it out as "PHP".
-  function exportPdf() {
+  function exportPdf(orientation) {
+    setChoosingOrientation(false)
     const doc = new jsPDF({ orientation, unit: 'mm', format: 'a4' })
     const pageW = doc.internal.pageSize.getWidth()
     const margin = 14
@@ -302,35 +303,55 @@ export default function Reports() {
         )}
       </Card>
 
-      <Card className="flex flex-col gap-3 w-full">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <span className="text-sm font-semibold text-on-surface-variant">PDF page orientation</span>
-          <div className="flex gap-2">
-            <Chip variant="filter" tone="primary" icon="table_view" selected={orientation === 'portrait'} onClick={() => setOrientation('portrait')}>
-              Portrait
-            </Chip>
-            <Chip variant="filter" tone="primary" icon="table_view" selected={orientation === 'landscape'} onClick={() => setOrientation('landscape')}>
-              Landscape
-            </Chip>
-          </div>
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <button
+          onClick={exportExcel}
+          className="w-full sm:w-auto flex-1 bg-surface-container-high text-on-surface px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
+        >
+          <Icon name="table_view" className="text-[22px]" />
+          Export Excel
+        </button>
+        <button
+          onClick={() => setChoosingOrientation(true)}
+          className="w-full sm:w-auto flex-1 bg-primary text-on-primary px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
+        >
+          <Icon name="ios_share" className="text-[22px]" />
+          Export PDF
+        </button>
+      </div>
+
+      {choosingOrientation && (
+        <div className="fixed inset-0 z-[60] bg-on-surface/40 flex items-center justify-center px-container-padding" onClick={() => setChoosingOrientation(false)}>
+          <Card className="w-full max-w-sm flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-on-surface text-center">Choose page orientation</h2>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => exportPdf('portrait')}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-outline-variant hover:border-primary hover:bg-primary-container/10 transition-colors"
+              >
+                <div className="w-8 h-11 rounded border-2 border-on-surface-variant flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-semibold text-on-surface">Portrait</div>
+                  <div className="text-sm text-on-surface-variant">Taller than wide — good for printing</div>
+                </div>
+              </button>
+              <button
+                onClick={() => exportPdf('landscape')}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-outline-variant hover:border-primary hover:bg-primary-container/10 transition-colors"
+              >
+                <div className="w-11 h-8 rounded border-2 border-on-surface-variant flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-semibold text-on-surface">Landscape</div>
+                  <div className="text-sm text-on-surface-variant">Wider than tall — more room for tables</div>
+                </div>
+              </button>
+            </div>
+            <button onClick={() => setChoosingOrientation(false)} className="text-sm font-semibold text-on-surface-variant hover:underline">
+              Cancel
+            </button>
+          </Card>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <button
-            onClick={exportExcel}
-            className="w-full sm:w-auto flex-1 bg-surface-container-high text-on-surface px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
-          >
-            <Icon name="table_view" className="text-[22px]" />
-            Export Excel
-          </button>
-          <button
-            onClick={exportPdf}
-            className="w-full sm:w-auto flex-1 bg-primary text-on-primary px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
-          >
-            <Icon name="ios_share" className="text-[22px]" />
-            Export PDF ({orientation === 'portrait' ? 'Portrait' : 'Landscape'})
-          </button>
-        </div>
-      </Card>
+      )}
 
       {Object.keys(expensesByCategory).length > 0 && (
         <Card className="flex flex-col gap-3 w-full">
