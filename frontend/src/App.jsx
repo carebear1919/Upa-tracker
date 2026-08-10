@@ -56,7 +56,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<Layout onLock={() => setUnlocked(false)} onLogout={handleLogout} />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/tenants" element={<Tenants />} />
           <Route path="/tenants/:id" element={<TenantDetail />} />

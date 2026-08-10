@@ -31,7 +31,7 @@ const navItems = navGroups.flatMap((group) => group.items)
 
 const COLLAPSE_KEY = 'renta-sidebar-collapsed'
 
-export default function Layout() {
+export default function Layout({ onLock, onLogout }) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1')
 
   function toggle() {
@@ -92,13 +92,52 @@ export default function Layout() {
             </div>
           ))}
         </nav>
+
+        <div className={`mt-auto flex flex-col gap-1 pt-4 border-t border-outline-variant/30 ${collapsed ? 'items-center' : ''}`}>
+          <button
+            onClick={onLock}
+            title="Lock App"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container-high transition-colors ${
+              collapsed ? 'justify-center px-0 w-11' : ''
+            }`}
+          >
+            <Icon name="lock" className="text-[20px] flex-shrink-0" />
+            {!collapsed && 'Lock App'}
+          </button>
+          <button
+            onClick={onLogout}
+            title="Log Out"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-secondary hover:bg-surface-container-high transition-colors ${
+              collapsed ? 'justify-center px-0 w-11' : ''
+            }`}
+          >
+            <Icon name="logout" className="text-[20px] flex-shrink-0" />
+            {!collapsed && 'Log Out'}
+          </button>
+        </div>
       </aside>
 
-      <header className="md:hidden w-full bg-surface-container-lowest shadow-level-1 border-b border-surface-variant sticky top-0 z-50 flex items-center px-4 py-3">
+      <header className="md:hidden w-full bg-surface-container-lowest shadow-level-1 border-b border-surface-variant sticky top-0 z-50 flex items-center justify-between px-4 py-3">
         <NavLink to="/" className="flex items-center gap-2">
           <Icon name="home" className="text-primary text-[28px]" />
           <span className="font-bold text-xl text-primary">Renta</span>
         </NavLink>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onLock}
+            aria-label="Lock App"
+            className="flex items-center justify-center min-h-tap-target-min min-w-tap-target-min rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors"
+          >
+            <Icon name="lock" className="text-[20px]" />
+          </button>
+          <button
+            onClick={onLogout}
+            aria-label="Log Out"
+            className="flex items-center justify-center min-h-tap-target-min min-w-tap-target-min rounded-full text-secondary hover:bg-surface-container-high transition-colors"
+          >
+            <Icon name="logout" className="text-[20px]" />
+          </button>
+        </div>
       </header>
 
       <div className={`flex-1 flex flex-col pb-20 md:pb-0 transition-[margin] duration-200 ${collapsed ? 'md:ml-20' : 'md:ml-60'}`}>
