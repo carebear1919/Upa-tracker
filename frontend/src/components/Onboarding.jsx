@@ -41,8 +41,15 @@ function DashboardSlide() {
   )
 }
 
+const SAMPLE_HISTORY = [
+  { date: 'Jul 1, 2026', amount: 8000 },
+  { date: 'Jun 1, 2026', amount: 8000 },
+  { date: 'May 1, 2026', amount: 8000 },
+]
+
 // Real tenant cards are tappable, opening their full history — so this demo
-// card is too, teaching the gesture instead of just describing it.
+// card is too, revealing an actual sample history instead of just describing
+// what would happen.
 function TenantsSlide() {
   const [tapped, setTapped] = useState(false)
 
@@ -65,14 +72,26 @@ function TenantsSlide() {
         </div>
         <Chip tone="secondary" size="sm">Due in 3d</Chip>
       </button>
-      <div className="min-h-[20px] flex items-center">
-        {tapped && (
-          <p className="text-sm font-semibold text-primary flex items-center gap-2 animate-[onboarding-pop-in_0.3s_ease-out]">
+
+      {tapped ? (
+        <div className="w-full flex flex-col gap-2 animate-[onboarding-slide-in_0.3s_ease-out]">
+          <p className="text-sm font-semibold text-primary flex items-center gap-2">
             <Icon name="check_circle" className="text-[16px]" />
-            That's it — tapping a tenant opens their full history.
+            Maria's payment history:
           </p>
-        )}
-      </div>
+          {SAMPLE_HISTORY.map((p) => (
+            <Card key={p.date} variant="nested" padding="md" className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <Icon name="calendar_today" className="text-primary text-[16px]" />
+                {p.date}
+              </span>
+              <span className="font-semibold text-on-surface">₱{p.amount.toLocaleString()}</span>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-on-surface-variant min-h-[20px]">Tap the card above to see what happens.</p>
+      )}
     </div>
   )
 }
