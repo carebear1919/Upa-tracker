@@ -437,35 +437,37 @@ export default function Reports() {
         </div>
       )}
 
-      {Object.keys(expensesByCategory).length > 0 && (
-        <Card className="flex flex-col gap-3 w-full">
-          <SectionHeader title="Expenses by Category" icon="receipt_long" />
-          <PieChart
-            slices={Object.entries(expensesByCategory).map(([cat, amt]) => ({
-              label: EXPENSE_CATEGORIES.find((c) => c.value === cat)?.label ?? cat,
-              value: amt,
-            }))}
-          />
-          <div className="flex flex-col gap-2">
-            {Object.entries(expensesByCategory).map(([cat, amt]) => {
-              const meta = EXPENSE_CATEGORIES.find((c) => c.value === cat)
-              return (
-                <div key={cat} className="flex items-center justify-between">
-                  <Chip size="sm" tone="neutral" icon={meta?.icon}>
-                    {meta?.label ?? cat}
-                  </Chip>
-                  <span className="font-semibold text-on-surface">{formatCurrency(amt)}</span>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter w-full items-start">
+        {Object.keys(expensesByCategory).length > 0 && (
+          <Card className="flex flex-col gap-3 w-full">
+            <SectionHeader title="Expenses by Category" icon="receipt_long" />
+            <PieChart
+              slices={Object.entries(expensesByCategory).map(([cat, amt]) => ({
+                label: EXPENSE_CATEGORIES.find((c) => c.value === cat)?.label ?? cat,
+                value: amt,
+              }))}
+            />
+            <div className="flex flex-col gap-2">
+              {Object.entries(expensesByCategory).map(([cat, amt]) => {
+                const meta = EXPENSE_CATEGORIES.find((c) => c.value === cat)
+                return (
+                  <div key={cat} className="flex items-center justify-between">
+                    <Chip size="sm" tone="neutral" icon={meta?.icon}>
+                      {meta?.label ?? cat}
+                    </Chip>
+                    <span className="font-semibold text-on-surface">{formatCurrency(amt)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        )}
 
-      <Card className="flex flex-col gap-2 w-full">
-        <SectionHeader title="Last 6 Months" icon="table_view" />
-        <MonthlyTrendChart payments={payments} expenses={expenses} anchorMonth={month} />
-      </Card>
+        <Card className="flex flex-col gap-2 w-full">
+          <SectionHeader title="Last 6 Months" icon="table_view" />
+          <MonthlyTrendChart payments={payments} expenses={expenses} anchorMonth={month} />
+        </Card>
+      </div>
 
       {monthExpenses.length > 0 && (
         <Card className="flex flex-col w-full">

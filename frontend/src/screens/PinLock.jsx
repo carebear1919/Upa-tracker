@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore, db } from '../lib/store.js'
 import { hashPin, verifyPin } from '../lib/pin.js'
 import Icon from '../components/Icon.jsx'
@@ -68,6 +68,22 @@ export default function PinLock({ onUnlock, onLogout }) {
       setPin('')
     }
   }
+
+  // Lets anyone on a desktop/laptop type their PIN on the physical keyboard
+  // instead of having to click the on-screen keypad.
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key >= '0' && e.key <= '9') {
+        press(e.key)
+      } else if (e.key === 'Backspace') {
+        press('back')
+      } else if (e.key === 'Enter' && isFirstRun && pin.length >= MIN_LENGTH) {
+        handleComplete(pin)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [pin, confirmPin, isFirstRun, settings.pinHash])
 
   const prompt = isFirstRun
     ? confirmPin === null
