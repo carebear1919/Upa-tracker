@@ -7,7 +7,7 @@ const MIN_LENGTH = 4
 const MAX_LENGTH = 6
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back']
 
-export default function PinLock({ onUnlock }) {
+export default function PinLock({ onUnlock, onLogout }) {
   const { settings } = useStore()
   const isFirstRun = !settings.pinHash
   const [pin, setPin] = useState('')
@@ -129,6 +129,11 @@ export default function PinLock({ onUnlock }) {
           </button>
         )}
       </div>
+      {onLogout && (
+        <button onClick={onLogout} className="text-sm font-semibold text-on-surface-variant hover:underline mt-2">
+          Log out
+        </button>
+      )}
     </div>
   )
 }

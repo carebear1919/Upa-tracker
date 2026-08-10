@@ -5,7 +5,7 @@
 // ever see get/add/update/remove — screens never know which backend is live.
 import { useSyncExternalStore } from 'react'
 import { DEFAULT_REMINDER_TEMPLATE } from './messageLinks.js'
-import { supabase, isSupabaseConfigured, ensureSession } from './supabase.js'
+import { supabase, isSupabaseConfigured } from './supabase.js'
 
 const KEY = 'renta-data-v1'
 
@@ -93,7 +93,7 @@ function makeId() {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 10)
 }
 
-let state = { tenants: [], payments: [], expenses: [], reminders: [], settings: seed().settings, loading: true }
+let state = { tenants: [], payments: [], expenses: [], reminders: [], settings: seed().settings, loading: true, authNeeded: false }
 const listeners = new Set()
 
 function emit() {
@@ -215,8 +215,8 @@ const localDb = {
 
 // ---------------------------------------------------------------------------
 // Supabase backend — row <-> camelCase mapping, optimistic local updates,
-// realtime sync so other tabs/devices signed into the same anonymous session
-// stay current.
+// realtime sync so other tabs/devices logged into the same account stay
+// current.
 // ---------------------------------------------------------------------------
 
 const ROW_TO_APP = {
@@ -254,6 +254,7 @@ function patchToRow(table, patch) {
 }
 
 let userId = null
+let dataLoaded = false
 
 function mergeLocal(table, row) {
   const item = ROW_TO_APP[table](row)
@@ -285,15 +286,13 @@ async function deleteRow(table, id) {
   else console.log(`[renta/db] ✓ delete ${table} confirmed in Supabase`)
 }
 
-async function initSupabase() {
-  console.log('[renta/init] Supabase configured, connecting…', { url: import.meta.env.VITE_SUPABASE_URL })
+async function initSupabase(session) {
+  console.log('[renta/init] Supabase configured, loading data for logged-in session…', { url: import.meta.env.VITE_SUPABASE_URL })
   try {
-    console.log('[renta/init] step 1/3: signing in anonymously…')
-    const session = await ensureSession()
     userId = session.user.id
-    console.log('[renta/init] ✓ signed in, auth.uid() =', userId)
+    console.log('[renta/init] ✓ using session, auth.uid() =', userId)
 
-    console.log('[renta/init] step 2/3: fetching tenants/payments/expenses/reminders/settings…')
+    console.log('[renta/init] step 1/2: fetching tenants/payments/expenses/reminders/settings…')
     const [tenantsRes, paymentsRes, expensesRes, remindersRes, settingsRes] = await Promise.all([
       supabase.from('tenants').select('*'),
       supabase.from('payments').select('*'),
@@ -329,9 +328,10 @@ async function initSupabase() {
       reminders: (remindersRes.data ?? []).map(ROW_TO_APP.reminders),
       settings,
       loading: false,
+      authNeeded: false,
     }
     emit()
-    console.log('[renta/init] step 3/3: subscribing to realtime updates…')
+    console.log('[renta/init] step 2/2: subscribing to realtime updates…')
 
     for (const table of ['tenants', 'payments', 'expenses', 'reminders']) {
       supabase
@@ -448,7 +448,23 @@ console.log(
 )
 
 if (isSupabaseConfigured) {
-  initSupabase()
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('[renta/auth]', event, session ? `uid=${session.user.id}` : '(no session)')
+    if (session && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+      if (!dataLoaded) {
+        dataLoaded = true
+        initSupabase(session)
+      }
+    } else if (event === 'SIGNED_OUT') {
+      dataLoaded = false
+      userId = null
+      state = { tenants: [], payments: [], expenses: [], reminders: [], settings: seed().settings, loading: false, authNeeded: true }
+      emit()
+    } else if (event === 'INITIAL_SESSION' && !session) {
+      state = { ...state, loading: false, authNeeded: true }
+      emit()
+    }
+  })
 } else {
   initLocal()
 }

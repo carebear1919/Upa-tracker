@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import Login from './screens/Login.jsx'
 import PinLock from './screens/PinLock.jsx'
 import Dashboard from './screens/Dashboard.jsx'
 import Tenants from './screens/Tenants.jsx'
@@ -13,6 +14,7 @@ import Reminders from './screens/Reminders.jsx'
 import Settings from './screens/Settings.jsx'
 import Icon from './components/Icon.jsx'
 import { useStore } from './lib/store.js'
+import { logout } from './lib/supabase.js'
 
 function LoadingScreen() {
   return (
@@ -24,22 +26,31 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  const { settings, loading } = useStore()
+  const { settings, loading, authNeeded } = useStore()
   const [unlocked, setUnlocked] = useState(false)
 
   // Don't decide the PIN gate off data that hasn't loaded yet (Supabase fetch
   // is async) — that would either flash the app unlocked or wrongly show the
   // first-run "create a PIN" screen to a returning user.
   useEffect(() => {
-    if (!loading && !settings.pinHash) setUnlocked(true)
-  }, [loading, settings.pinHash])
+    if (!loading && !authNeeded && !settings.pinHash) setUnlocked(true)
+  }, [loading, authNeeded, settings.pinHash])
+
+  async function handleLogout() {
+    setUnlocked(false)
+    await logout()
+  }
 
   if (loading) {
     return <LoadingScreen />
   }
 
+  if (authNeeded) {
+    return <Login />
+  }
+
   if (!unlocked) {
-    return <PinLock onUnlock={() => setUnlocked(true)} />
+    return <PinLock onUnlock={() => setUnlocked(true)} onLogout={handleLogout} />
   }
 
   return (
@@ -54,7 +65,7 @@ export default function App() {
           <Route path="/add-expense" element={<AddExpense />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reminders" element={<Reminders />} />
-          <Route path="/settings" element={<Settings onLock={() => setUnlocked(false)} />} />
+          <Route path="/settings" element={<Settings onLock={() => setUnlocked(false)} onLogout={handleLogout} />} />
         </Route>
       </Routes>
     </BrowserRouter>

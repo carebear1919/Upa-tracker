@@ -15,16 +15,25 @@ Follow steps 1-4 to get the app running on real data. Step 5 is optional
 6. You should see "Success. No rows returned." That means the tables were
    created.
 
-## Step 2: Turn on anonymous sign-ins
+## Step 2: Log in from the app
 
-The app has no login screen — it uses a PIN instead. But it still needs
-*some* way to identify "this install's data" to the database, invisibly.
-That's what this step enables.
+The app has its own Log In / Create Account screen — this is where every
+device's data gets tied to the same account, so any device signed into the
+same email/password sees the same tenants, payments, and expenses. A PIN
+lock still sits on top of this and is asked every time the app opens, even
+though the device stays logged in.
 
-1. Left sidebar → **Authentication** icon (looks like a person outline).
-2. Along the top of that page, click the **Sign In / Providers** tab.
-3. Scroll down to find **Anonymous Sign-Ins**.
-4. Toggle it **on**.
+1. Open the app for the first time.
+2. Tap "Don't have an account? Create one", enter an email and password,
+   and submit.
+3. You'll then be asked to create your PIN — that's separate from the
+   login and is what you'll actually type day to day.
+4. On any other device, use the same email/password to log in — it'll land
+   on the exact same data.
+
+If "Anonymous Sign-Ins" is toggled on under Authentication → Sign In /
+Providers from earlier testing, it's safe to turn back off — the app no
+longer uses it.
 
 ## Step 3: Get your API keys
 

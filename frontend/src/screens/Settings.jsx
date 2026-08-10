@@ -34,7 +34,7 @@ function Learn({ children }) {
   )
 }
 
-export default function Settings({ onLock }) {
+export default function Settings({ onLock, onLogout }) {
   const { settings } = useStore()
   const [toastMsg, showToast] = useToast()
 
@@ -238,7 +238,7 @@ export default function Settings({ onLock }) {
 
       <div className="pt-4 flex flex-col md:flex-row md:items-center md:justify-end gap-4">
         <p className="text-sm text-on-surface-variant text-center md:text-right md:max-w-xs">
-          Done for now? Locking the app hides everything behind your PIN again — nothing is lost, it's just how you close up when you're finished.
+          "Lock App" just hides things behind your PIN again. "Log Out" fully signs this device out — you'll need your email and password to get back in.
         </p>
         <button
           onClick={onLock}
@@ -246,6 +246,13 @@ export default function Settings({ onLock }) {
         >
           <Icon name="lock" className="text-[22px]" />
           <span className="font-semibold">Lock App</span>
+        </button>
+        <button
+          onClick={onLogout}
+          className="w-full md:w-auto min-h-[56px] px-8 bg-surface-container-low border-2 border-outline text-on-surface-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors"
+        >
+          <Icon name="logout" className="text-[22px]" />
+          <span className="font-semibold">Log Out</span>
         </button>
       </div>
 
