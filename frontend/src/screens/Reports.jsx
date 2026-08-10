@@ -9,6 +9,7 @@ import Chip from '../components/Chip.jsx'
 import IconButton from '../components/IconButton.jsx'
 import SectionHeader from '../components/SectionHeader.jsx'
 import MonthlyTrendChart from '../components/MonthlyTrendChart.jsx'
+import PieChart from '../components/PieChart.jsx'
 
 const inputCls = 'w-full min-h-[44px] border-2 border-outline-variant rounded-lg px-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
@@ -439,6 +440,12 @@ export default function Reports() {
       {Object.keys(expensesByCategory).length > 0 && (
         <Card className="flex flex-col gap-3 w-full">
           <SectionHeader title="Expenses by Category" icon="receipt_long" />
+          <PieChart
+            slices={Object.entries(expensesByCategory).map(([cat, amt]) => ({
+              label: EXPENSE_CATEGORIES.find((c) => c.value === cat)?.label ?? cat,
+              value: amt,
+            }))}
+          />
           <div className="flex flex-col gap-2">
             {Object.entries(expensesByCategory).map(([cat, amt]) => {
               const meta = EXPENSE_CATEGORIES.find((c) => c.value === cat)
