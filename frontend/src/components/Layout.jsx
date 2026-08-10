@@ -33,6 +33,13 @@ const COLLAPSE_KEY = 'renta-sidebar-collapsed'
 
 export default function Layout({ onLock, onLogout }) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1')
+  const [hovering, setHovering] = useState(false)
+
+  // Hovering a collapsed sidebar temporarily shows it expanded, without
+  // touching the persisted collapsed preference — the main content's margin
+  // stays put (still keyed off `collapsed`), so this reads as an overlay
+  // peeking out rather than the whole page reflowing.
+  const expanded = !collapsed || hovering
 
   function toggle() {
     setCollapsed((c) => {
@@ -44,14 +51,16 @@ export default function Layout({ onLock, onLogout }) {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <aside
+        onMouseEnter={() => collapsed && setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
         className={`hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 bg-surface-container-lowest shadow-level-1 border-r border-surface-variant gap-8 z-40 transition-[width] duration-200 ${
-          collapsed ? 'md:w-20 p-3' : 'md:w-60 p-6'
+          expanded ? 'md:w-60 p-6' : 'md:w-20 p-3'
         }`}
       >
-        <div className={`flex items-center ${collapsed ? 'flex-col gap-3' : 'justify-between'}`}>
+        <div className={`flex items-center ${expanded ? 'justify-between' : 'flex-col gap-3'}`}>
           <NavLink to="/" className="flex items-center gap-2 min-w-0" title="Renta">
             <Icon name="home" className="text-primary text-[28px] flex-shrink-0" />
-            {!collapsed && <span className="font-bold text-2xl text-primary truncate">Renta</span>}
+            {expanded && <span className="font-bold text-2xl text-primary truncate">Renta</span>}
           </NavLink>
           <button
             onClick={toggle}
@@ -64,7 +73,7 @@ export default function Layout({ onLock, onLogout }) {
         <nav className="flex flex-col gap-4">
           {navGroups.map((group) => (
             <div key={group.label} className="flex flex-col gap-1">
-              {!collapsed && (
+              {expanded && (
                 <span className="px-4 text-xs font-bold uppercase tracking-wide text-on-surface-variant/60">
                   {group.label}
                 </span>
@@ -77,7 +86,7 @@ export default function Layout({ onLock, onLogout }) {
                   title={item.label}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-lg transition-colors ${
-                      collapsed ? 'justify-center px-0' : ''
+                      expanded ? '' : 'justify-center px-0'
                     } ${
                       isActive
                         ? 'bg-primary-container text-on-primary-container'
@@ -86,33 +95,33 @@ export default function Layout({ onLock, onLogout }) {
                   }
                 >
                   <Icon name={item.icon} className="text-[22px] flex-shrink-0" />
-                  {!collapsed && item.label}
+                  {expanded && item.label}
                 </NavLink>
               ))}
             </div>
           ))}
         </nav>
 
-        <div className={`mt-auto flex flex-col gap-1 pt-4 border-t border-outline-variant/30 ${collapsed ? 'items-center' : ''}`}>
+        <div className={`mt-auto flex flex-col gap-1 pt-4 border-t border-outline-variant/30 ${expanded ? '' : 'items-center'}`}>
           <button
             onClick={onLock}
             title="Lock App"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container-high transition-colors ${
-              collapsed ? 'justify-center px-0 w-11' : ''
+              expanded ? '' : 'justify-center px-0 w-11'
             }`}
           >
             <Icon name="lock" className="text-[20px] flex-shrink-0" />
-            {!collapsed && 'Lock App'}
+            {expanded && 'Lock App'}
           </button>
           <button
             onClick={onLogout}
             title="Log Out"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-secondary hover:bg-surface-container-high transition-colors ${
-              collapsed ? 'justify-center px-0 w-11' : ''
+              expanded ? '' : 'justify-center px-0 w-11'
             }`}
           >
             <Icon name="logout" className="text-[20px] flex-shrink-0" />
-            {!collapsed && 'Log Out'}
+            {expanded && 'Log Out'}
           </button>
         </div>
       </aside>
