@@ -58,6 +58,7 @@ function StartingBalanceEditor({ settings, standalone = false }) {
               autoFocus
               type="number"
               min="0"
+              step="0.01"
               value={value}
               onChange={(e) => setValue(e.target.value)}
               className="w-full min-h-[40px] border-2 border-outline-variant rounded-lg px-2 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"

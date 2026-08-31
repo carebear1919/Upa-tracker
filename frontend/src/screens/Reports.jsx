@@ -39,7 +39,7 @@ function ExpenseRow({ expense }) {
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </select>
-          <input required type="number" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
+          <input required type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
           <input required type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className={inputCls} />
         </div>
         <div className="flex gap-3">

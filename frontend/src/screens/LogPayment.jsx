@@ -53,6 +53,7 @@ export default function LogPayment() {
                 required
                 type="number"
                 min="0"
+                step="0.01"
                 placeholder={status ? String(status.balance) : ''}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}

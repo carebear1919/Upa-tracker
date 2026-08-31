@@ -53,7 +53,7 @@ export default function AddExpense() {
               </div>
             </Field>
             <Field label="Amount">
-              <input required type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
+              <input required type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
             </Field>
             <Field label="Date">
               <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />

@@ -160,7 +160,7 @@ export default function Settings({ onLock, onLogout }) {
               <input
                 type="number"
                 min="0"
-                step="1"
+                step="0.01"
                 value={openingBalance}
                 onChange={(e) => setOpeningBalance(e.target.value)}
                 className={inputCls}

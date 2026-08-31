@@ -28,7 +28,7 @@ function PaymentRow({ payment, tenant }) {
     return (
       <form onSubmit={save} className="bg-surface-container-low rounded-lg p-4 flex flex-col gap-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input required type="number" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
+          <input required type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
           <input required type="date" value={form.datePaid} onChange={(e) => setForm({ ...form, datePaid: e.target.value })} className={inputCls} />
         </div>
         <div className="flex gap-3">

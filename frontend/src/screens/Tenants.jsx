@@ -87,7 +87,7 @@ export default function Tenants() {
             <FormGroup label="Rent & Due Date">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Monthly Rent">
-                  <input required type="number" min="0" value={form.monthlyRent} onChange={(e) => setForm({ ...form, monthlyRent: e.target.value })} className={inputCls} />
+                  <input required type="number" min="0" step="0.01" value={form.monthlyRent} onChange={(e) => setForm({ ...form, monthlyRent: e.target.value })} className={inputCls} />
                 </Field>
                 <Field label="Due Day (1-31)">
                   <input required type="number" min="1" max="31" value={form.dueDay} onChange={(e) => setForm({ ...form, dueDay: e.target.value })} className={inputCls} />
