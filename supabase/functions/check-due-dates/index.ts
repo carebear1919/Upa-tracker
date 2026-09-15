@@ -43,9 +43,7 @@ Deno.serve(async (req) => {
     if (!stage) continue
 
     const balance = Number(tenant.monthly_rent) - paid
-    const message = `Hi ${tenant.name}, this is a reminder that your rent of ₱${balance} is ${
-      stage === 'overdue' ? 'now overdue' : `due on day ${tenant.due_day}`
-    }. Thank you!`
+    const message = `Hello ${tenant.name}, remind ko lang sana ung due payment mo ₱${balance} this day ${tenant.due_day}, salamat!`
 
     let channel: string | null = null
     try {

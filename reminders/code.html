@@ -230,4 +230,22 @@
 <span class="font-label-lg text-label-lg">Reminders</span>
 </a>
 </nav>
+<script>
+document.querySelectorAll('button').forEach(btn => {
+    if (!btn.textContent.trim().match(/Send Message|Message$/)) return;
+    btn.addEventListener('click', () => {
+        const card = btn.closest('.bg-surface-container-lowest');
+        const name = card.querySelector('h2').textContent.trim();
+        const dateP = card.querySelectorAll('p')[0];
+        const dateText = dateP.textContent.replace('Overdue:', '').replace('Due on', 'Due on').trim();
+        const amount = card.querySelectorAll('p')[1].textContent.trim();
+        const msg = `Hello ${name}, remind ko lang sana ung due payment mo ${amount} this ${dateText}, salamat!`;
+        navigator.clipboard.writeText(msg).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied!';
+            setTimeout(() => btn.innerHTML = orig, 1500);
+        });
+    });
+});
+</script>
 </body></html>

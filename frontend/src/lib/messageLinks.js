@@ -27,7 +27,7 @@ export function messengerLink(link, message) {
 }
 
 export const DEFAULT_REMINDER_TEMPLATE =
-  'Hi {name}, this is a reminder that your rent of {amount} is due on day {due_day}. Thank you!'
+  'Hello {name}, remind ko lang sana ung due payment mo {amount} this day {due_day}, salamat!'
 
 // One template, set once in Settings/Reminders, used for every tenant's
 // reminder — no per-tenant wording to manage. {amount} comes pre-formatted
