@@ -29,6 +29,15 @@ function seed() {
   }
 }
 
+// Installations created before the Tagalog wording was the default may still
+// hold the old English template in their settings row. Reset straight English
+// wording back to the Tagalog default so every tenant gets the same message.
+function normalizeReminderTemplate(template) {
+  const legacy =
+    /this is a reminder|your rent of|due on day|remind ko lang/i.test(template ?? '')
+  return legacy && template !== DEFAULT_REMINDER_TEMPLATE ? DEFAULT_REMINDER_TEMPLATE : template
+}
+
 function monthKeyOffset(offset, base = new Date()) {
   let year = base.getFullYear()
   let month = base.getMonth() + 1 + offset
@@ -123,7 +132,7 @@ function localLoad() {
     if (raw) {
       const data = JSON.parse(raw)
       data.settings.openingBalance ??= 0
-      data.settings.reminderTemplate ??= DEFAULT_REMINDER_TEMPLATE
+      data.settings.reminderTemplate = normalizeReminderTemplate(data.settings.reminderTemplate ?? DEFAULT_REMINDER_TEMPLATE)
       data.reminders ??= []
       return data
     }
@@ -313,7 +322,7 @@ async function initSupabase(session) {
         businessName: settingsRes.data.business_name,
         currency: settingsRes.data.currency,
         openingBalance: Number(settingsRes.data.opening_balance),
-        reminderTemplate: settingsRes.data.reminder_template,
+        reminderTemplate: normalizeReminderTemplate(settingsRes.data.reminder_template),
       }
     } else {
       console.log('[renta/init] no settings row yet for this install — creating one')

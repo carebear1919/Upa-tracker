@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
     if (!stage) continue
 
     const balance = Number(tenant.monthly_rent) - paid
-    const message = `Hello ${tenant.name}, remind ko lang sana ung due payment mo ₱${balance} this day ${tenant.due_day}, salamat!`
+    const monthName = today.toLocaleString('en-US', { month: 'long' })
+    const message = `Hello ${tenant.name}, remind ko lang sana ung due payment mo ₱${balance} the day ${tenant.due_day} ${monthName} today, salamat!`
 
     let channel: string | null = null
     try {

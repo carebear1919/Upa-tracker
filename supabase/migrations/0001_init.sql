@@ -14,7 +14,7 @@ create table if not exists settings (
   business_name text not null default 'Renta',
   currency text not null default 'PHP',
   opening_balance numeric not null default 0,
-  reminder_template text not null default 'Hello {name}, remind ko lang sana ung due payment mo {amount} this day {due_day}, salamat!',
+  reminder_template text not null default 'Hello {name}, remind ko lang sana ung due payment mo {amount} the day {due_day} {month} today, salamat!',
   updated_at timestamptz not null default now()
 );
 

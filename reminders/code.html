@@ -238,8 +238,11 @@ document.querySelectorAll('button').forEach(btn => {
         const name = card.querySelector('h2').textContent.trim();
         const dateP = card.querySelectorAll('p')[0];
         const dateText = dateP.textContent.replace('Overdue:', '').replace('Due on', 'Due on').trim();
+        const m = dateText.match(/^Due on (\w+) (\d{1,2})/i);
+        const month = m ? m[1] : new Date().toLocaleString('en-US', { month: 'long' });
+        const day = m ? m[2] : new Date().getDate();
         const amount = card.querySelectorAll('p')[1].textContent.trim();
-        const msg = `Hello ${name}, remind ko lang sana ung due payment mo ${amount} this ${dateText}, salamat!`;
+        const msg = `Hello ${name}, remind ko lang sana ung due payment mo ${amount} the day ${day} ${month} today, salamat!`;
         navigator.clipboard.writeText(msg).then(() => {
             const orig = btn.innerHTML;
             btn.innerHTML = '<span class="material-symbols-outlined">check</span> Copied!';

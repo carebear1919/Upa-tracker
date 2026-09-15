@@ -52,8 +52,8 @@ function MessageFormatEditor({ template }) {
             className="w-full border-2 border-outline-variant rounded-lg px-4 py-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"
           />
           <p className="text-sm text-on-surface-variant">
-            Use <code className="font-semibold">{'{name}'}</code>, <code className="font-semibold">{'{amount}'}</code>, and{' '}
-            <code className="font-semibold">{'{due_day}'}</code> — they'll be swapped in per tenant.
+            Use <code className="font-semibold">{'{name}'}</code>, <code className="font-semibold">{'{amount}'}</code>,{' '}
+            <code className="font-semibold">{'{due_day}'}</code>, and <code className="font-semibold">{'{month}'}</code> — they'll be swapped in per tenant.
           </p>
           <div className="bg-surface-container-low rounded-lg p-3 text-sm text-on-surface-variant">
             <span className="font-semibold text-on-surface-variant">Preview: </span>
