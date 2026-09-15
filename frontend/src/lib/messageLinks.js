@@ -27,7 +27,7 @@ export function messengerLink(link, message) {
 }
 
 export const DEFAULT_REMINDER_TEMPLATE =
-  'Hello {name}, remind ko lang sana ung due payment mo {amount} the day {due_day} {month} today, salamat!'
+  'Hello, remind ko lang sana ung due payment mo na {amount} this {month} {due_day} salamat!'
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',

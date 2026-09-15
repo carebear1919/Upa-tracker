@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 
     const balance = Number(tenant.monthly_rent) - paid
     const monthName = today.toLocaleString('en-US', { month: 'long' })
-    const message = `Hello ${tenant.name}, remind ko lang sana ung due payment mo ₱${balance} the day ${tenant.due_day} ${monthName} today, salamat!`
+    const message = `Hello, remind ko lang sana ung due payment mo na ₱${balance} this ${monthName} ${tenant.due_day} salamat!`
 
     let channel: string | null = null
     try {
