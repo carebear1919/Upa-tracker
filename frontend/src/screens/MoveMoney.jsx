@@ -5,6 +5,7 @@ import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
 import { notify } from '../lib/notice.js'
+import { TransferRow } from '../components/EntryRows.jsx'
 
 // Relocates money between Cash / GCash / Check — e.g. a check that was
 // cashed, or GCash cashed out to cash. Nothing is added or removed from
@@ -26,6 +27,7 @@ export default function MoveMoney() {
 
   const { pots } = balancesByMethod(payments, withdrawals, transfers, currentMonth(), expenses, settings.openingBalance)
   const sameMethod = from === to
+  const monthTransfers = transfers.filter((t) => t.date.startsWith(currentMonth()))
   const tooMuch = Number(amount) > pots[from]
 
   function submit(e) {
@@ -89,6 +91,16 @@ export default function MoveMoney() {
           ))}
         </Card>
       </div>
+
+      {monthTransfers.length > 0 && (
+        <Card className="flex flex-col w-full">
+          <h2 className="font-semibold text-on-surface">Moved This Month</h2>
+          <p className="text-sm text-on-surface-variant my-2">Moved the wrong amount? Remove it with the trash and enter it again.</p>
+          {[...monthTransfers].sort((a, b) => b.date.localeCompare(a.date)).map((x) => (
+            <TransferRow key={x.id} transfer={x} />
+          ))}
+        </Card>
+      )}
     </>
   )
 }

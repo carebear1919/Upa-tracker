@@ -4,6 +4,7 @@ import { useStore, db, currentMonth, formatCurrency, EXPENSE_CATEGORIES } from '
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
 import { notify } from '../lib/notice.js'
+import { ExpenseRow } from '../components/EntryRows.jsx'
 
 export default function AddExpense() {
   const { expenses } = useStore()
@@ -91,6 +92,16 @@ export default function AddExpense() {
           </div>
         </Card>
       </div>
+
+      {monthExpenses.length > 0 && (
+        <Card className="flex flex-col w-full">
+          <h2 className="font-semibold text-on-surface">Logged This Month</h2>
+          <p className="text-sm text-on-surface-variant my-2">Made a mistake? Tap the pencil to fix it, or the trash to remove it.</p>
+          {[...monthExpenses].sort((a, b) => b.date.localeCompare(a.date)).map((x) => (
+            <ExpenseRow key={x.id} expense={x} />
+          ))}
+        </Card>
+      )}
     </>
   )
 }

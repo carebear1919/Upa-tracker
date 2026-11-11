@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, db, currentMonth, formatCurrency, balancesByMethod, PAYMENT_METHODS } from '../lib/store.js'
 import { notify } from '../lib/notice.js'
+import { WithdrawalRow } from '../components/EntryRows.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
 
@@ -78,6 +79,16 @@ export default function Withdraw() {
           </p>
         </Card>
       </div>
+
+      {monthWithdrawals.length > 0 && (
+        <Card className="flex flex-col w-full">
+          <h2 className="font-semibold text-on-surface">Taken Out This Month</h2>
+          <p className="text-sm text-on-surface-variant my-2">Made a mistake? Tap the pencil to fix it, or the trash to remove it.</p>
+          {[...monthWithdrawals].sort((a, b) => b.date.localeCompare(a.date)).map((x) => (
+            <WithdrawalRow key={x.id} withdrawal={x} />
+          ))}
+        </Card>
+      )}
     </>
   )
 }
