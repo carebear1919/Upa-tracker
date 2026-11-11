@@ -127,7 +127,7 @@ export default function Layout({ onLock, onLogout }) {
       </aside>
 
       <header className="md:hidden w-full bg-surface-container-lowest shadow-level-1 border-b border-surface-variant sticky top-0 z-50 flex items-center justify-between px-4 py-3">
-        <NavLink to="/" className="flex items-center gap-2">
+        <NavLink to="/" className="flex items-center gap-2 min-h-tap-target-min">
           <Icon name="home" className="text-primary text-[28px]" />
           <span className="font-bold text-xl text-primary">Renta</span>
         </NavLink>
@@ -149,7 +149,7 @@ export default function Layout({ onLock, onLogout }) {
         </div>
       </header>
 
-      <div className={`flex-1 flex flex-col pb-20 md:pb-0 transition-[margin] duration-200 ${collapsed ? 'md:ml-20' : 'md:ml-60'}`}>
+      <div className={`flex-1 min-w-0 flex flex-col pb-20 md:pb-0 transition-[margin] duration-200 ${collapsed ? 'md:ml-20' : 'md:ml-60'}`}>
         <main className="w-full flex flex-col gap-stack-gap px-4 md:px-container-padding py-6 md:py-8 flex-grow">
           <Outlet />
         </main>

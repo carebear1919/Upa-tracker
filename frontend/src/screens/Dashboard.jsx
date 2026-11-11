@@ -123,12 +123,8 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="mb-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Dashboard</h1>
-        <p className="text-on-surface-variant">This month's rent, expenses, and money left at a glance.</p>
-      </div>
+      <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-2">Dashboard</h1>
 
-      <SectionHeader title="This Month" icon="assessment" />
       <Card className="flex flex-col gap-6 w-full">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -169,66 +165,31 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      <SectionHeader
-        title="Where the Money Is"
-        icon="payments"
-        className="mt-2"
-        action={{ label: 'Move money', to: '/move-money', icon: 'chevron_right' }}
-      />
-      <Card className="w-full flex flex-col gap-4">
-        <dl className="grid grid-cols-3 divide-x divide-outline-variant/40">
-          {PAYMENT_METHODS.map((m) => (
-            <div key={m} className="px-3 sm:px-5 first:pl-0 last:pr-0">
-              <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">{m}</dt>
-              <dd className="text-lg sm:text-xl font-bold text-on-background">{formatCurrency(pots[m])}</dd>
-            </div>
-          ))}
-        </dl>
-        {unassigned !== 0 && (
-          <p className="text-sm text-on-surface-variant">
-            Starting balance minus expenses ({formatCurrency(unassigned)}) isn't tied to Cash, GCash or Check. Add it to the
-            three above and you get your {formatCurrency(balance)} Money Left.
-          </p>
-        )}
-      </Card>
-
-      <SectionHeader title="Quick Actions" icon="add_circle" className="mt-2" />
-      <section className="flex flex-col md:flex-row gap-gutter w-full">
+      <section className="grid grid-cols-3 gap-3 w-full" aria-label="Quick actions">
         <Link
           to="/log-payment"
-          className="w-full min-h-tap-target-min flex-1 bg-primary text-on-primary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-[0.98] transition-transform"
+          className="min-h-[88px] md:min-h-tap-target-min bg-primary text-on-primary rounded-xl p-3 flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 shadow-level-2 active:scale-[0.98] transition-transform"
         >
           <Icon name="payments" className="text-[28px]" />
-          <span className="font-semibold text-lg">Log Rent</span>
+          <span className="font-semibold md:text-lg text-center leading-tight">Log Rent</span>
         </Link>
         <Link
           to="/add-expense"
-          className="w-full min-h-tap-target-min flex-1 bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-4 flex items-center justify-center gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
+          className="min-h-[88px] md:min-h-tap-target-min bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-3 flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
         >
           <Icon name="receipt_long" className="text-[28px] text-secondary" />
-          <span className="font-semibold text-lg">Add Expense</span>
+          <span className="font-semibold md:text-lg text-center leading-tight">Add Expense</span>
         </Link>
         <Link
           to="/withdraw"
-          className="w-full min-h-tap-target-min flex-1 bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-4 flex items-center justify-center gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
+          className="min-h-[88px] md:min-h-tap-target-min bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-3 flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
         >
           <Icon name="logout" className="text-[28px] text-on-surface-variant" />
-          <span className="font-semibold text-lg">Withdraw</span>
+          <span className="font-semibold md:text-lg text-center leading-tight">Withdraw</span>
         </Link>
       </section>
 
-      <Link
-        to="/payments"
-        className="flex items-center justify-between gap-2 bg-surface-container-lowest shadow-level-1 rounded-xl px-5 py-3 text-primary font-semibold hover:bg-surface-container-high transition-colors w-full"
-      >
-        <span className="flex items-center gap-2">
-          <Icon name="payments" className="text-[18px]" />
-          View all payments
-        </span>
-        <Icon name="chevron_right" className="text-[18px]" />
-      </Link>
-
-      <section className="flex flex-col gap-4 w-full mt-4">
+      <section className="flex flex-col gap-4 w-full">
         <SectionHeader title="Need to Pay" icon="notifications" />
         {unpaid.length === 0 && (
           <Card className="flex items-center gap-3">
@@ -277,6 +238,30 @@ export default function Dashboard() {
           })}
         </div>
       </section>
+
+      <SectionHeader
+        title="Where the Money Is"
+        icon="payments"
+        className="mt-2"
+        action={{ label: 'Move money', to: '/move-money', icon: 'chevron_right' }}
+      />
+      <Card className="w-full flex flex-col gap-4">
+        <dl className="grid grid-cols-3 divide-x divide-outline-variant/40">
+          {PAYMENT_METHODS.map((m) => (
+            <div key={m} className="px-3 sm:px-5 first:pl-0 last:pr-0">
+              <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">{m}</dt>
+              <dd className="text-lg sm:text-xl font-bold text-on-background">{formatCurrency(pots[m])}</dd>
+            </div>
+          ))}
+        </dl>
+        {unassigned !== 0 && (
+          <p className="text-sm text-on-surface-variant">
+            Starting balance minus expenses ({formatCurrency(unassigned)}) isn't tied to Cash, GCash or Check. Add it to the
+            three above and you get your {formatCurrency(balance)} Money Left.
+          </p>
+        )}
+      </Card>
+
     </>
   )
 }

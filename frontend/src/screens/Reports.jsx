@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useStore, formatCurrency, startingBalance, moneyByPlace, EXPENSE_CATEGORIES, paymentStatus } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
@@ -40,6 +39,8 @@ export default function Reports() {
   const { tenants, payments, expenses, withdrawals, transfers, settings } = useStore()
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
   const [choosingOrientation, setChoosingOrientation] = useState(false)
+  // On a phone the charts and entry lists sit behind one button, so the report's numbers come first.
+  const [showMore, setShowMore] = useState(false)
 
   const monthPayments = payments.filter((p) => p.monthCovered === month)
   const monthExpenses = expenses.filter((e) => e.date.startsWith(month))
@@ -430,10 +431,6 @@ export default function Reports() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Monthly Report</h1>
           <p className="text-on-surface-variant">Pick a month below, then export it as a PDF or spreadsheet.</p>
-          <Link to="/payments" className="text-primary font-semibold hover:underline inline-flex items-center gap-1 mt-1">
-            <Icon name="payments" className="text-[18px]" />
-            View all payments
-          </Link>
         </div>
         <input
           type="month"
@@ -463,11 +460,11 @@ export default function Reports() {
 
       <Card className="flex flex-col gap-4 w-full">
         <SectionHeader
-          title={`Where the Money Is — end of ${monthLabel(month)}`}
+          title="Where the Money Is"
           icon="payments"
-          subtitle="Start of month + rent in + moved − taken out = end of month"
+          subtitle={`End of ${monthLabel(month)}: start + rent in + moved − taken out`}
         />
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-sm text-on-surface-variant border-b border-outline-variant">
@@ -503,21 +500,24 @@ export default function Reports() {
             </tfoot>
           </table>
         </div>
-        <div className="md:hidden flex flex-col divide-y divide-outline-variant/40">
-          {places.rows.map((p) => (
-            <div key={p.name} className="py-3 first:pt-0 flex flex-col gap-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="font-semibold text-on-surface">{p.other ? `${p.name}*` : p.name}</span>
-                <span className={`text-xl font-bold ${p.end < 0 ? 'text-secondary' : 'text-on-surface'}`}>{formatCurrency(p.end)}</span>
+        <div className="lg:hidden flex flex-col divide-y divide-outline-variant/40">
+          {places.rows.map((p) => {
+            const parts = [
+              `Started ${formatCurrency(p.start)}`,
+              p.rentIn ? `Rent in ${formatCurrency(p.rentIn)}` : null,
+              p.moved ? `Moved ${p.moved > 0 ? '+' : '-'}${formatCurrency(Math.abs(p.moved))}` : null,
+              p.out ? `Taken out ${formatCurrency(p.out)}` : null,
+            ].filter(Boolean)
+            return (
+              <div key={p.name} className="py-3 first:pt-0 flex flex-col gap-1">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-semibold text-on-surface">{p.other ? `${p.name}*` : p.name}</span>
+                  <span className={`text-xl font-bold whitespace-nowrap ${p.end < 0 ? 'text-secondary' : 'text-on-surface'}`}>{formatCurrency(p.end)}</span>
+                </div>
+                <p className="text-sm text-on-surface-variant">{parts.join(' · ')}</p>
               </div>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-on-surface-variant">
-                <div className="flex justify-between gap-2"><dt>Start</dt><dd className="text-on-surface">{formatCurrency(p.start)}</dd></div>
-                <div className="flex justify-between gap-2"><dt>Rent in</dt><dd className="text-primary">{p.rentIn ? formatCurrency(p.rentIn) : '–'}</dd></div>
-                <div className="flex justify-between gap-2"><dt>Moved</dt><dd className="text-on-surface">{p.moved ? `${p.moved > 0 ? '+' : '-'}${formatCurrency(Math.abs(p.moved))}` : '–'}</dd></div>
-                <div className="flex justify-between gap-2"><dt>Taken out</dt><dd className="text-secondary">{p.out ? formatCurrency(p.out) : '–'}</dd></div>
-              </dl>
-            </div>
-          ))}
+            )
+          })}
           <div className="pt-3 flex items-baseline justify-between gap-3 font-bold text-on-surface">
             <span>Total</span>
             <span className="text-xl text-primary">{formatCurrency(places.total.end)}</span>
@@ -560,14 +560,14 @@ export default function Reports() {
       <div className="flex flex-col sm:flex-row gap-3 w-full">
         <button
           onClick={exportExcel}
-          className="w-full sm:w-auto flex-1 bg-surface-container-high text-on-surface px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
+          className="w-full sm:w-auto sm:flex-1 bg-surface-container-high text-on-surface px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
         >
           <Icon name="table_view" className="text-[22px]" />
           Export Excel
         </button>
         <button
           onClick={() => setChoosingOrientation(true)}
-          className="w-full sm:w-auto flex-1 bg-primary text-on-primary px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
+          className="w-full sm:w-auto sm:flex-1 bg-primary text-on-primary px-8 h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
         >
           <Icon name="ios_share" className="text-[22px]" />
           Export PDF
@@ -607,6 +607,17 @@ export default function Reports() {
         </div>
       )}
 
+      <button
+        type="button"
+        onClick={() => setShowMore((v) => !v)}
+        aria-expanded={showMore}
+        className="md:hidden w-full min-h-tap-target-min flex items-center justify-center gap-2 rounded-xl border-2 border-outline text-on-surface font-semibold"
+      >
+        {showMore ? 'Hide charts and entries' : 'Show charts and entries'}
+        <Icon name={showMore ? 'chevron_left' : 'chevron_right'} className={`text-[20px] ${showMore ? '-rotate-90' : 'rotate-90'}`} />
+      </button>
+
+      <div className={`${showMore ? 'flex' : 'hidden'} md:flex flex-col gap-stack-gap w-full`}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter w-full items-start">
         {Object.keys(expensesByCategory).length > 0 && (
           <Card className="flex flex-col gap-3 w-full">
@@ -681,6 +692,7 @@ export default function Reports() {
           monthTransfers.map((t) => <TransferRow key={t.id} transfer={t} />)
         )}
       </Card>
+      </div>
     </>
   )
 }

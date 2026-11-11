@@ -34,7 +34,7 @@ function MessageFormatEditor({ template }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-between gap-2 text-left"
+        className="flex items-center justify-between gap-2 text-left min-h-tap-target-min"
       >
         <span className="text-lg font-semibold text-on-surface flex items-center gap-2">
           <Icon name="edit" className="text-[20px]" />

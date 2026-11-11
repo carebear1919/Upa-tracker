@@ -27,7 +27,7 @@ export default function RemindButton({ tenant, balance, template, size = 'md' })
 
   const btnCls =
     size === 'sm'
-      ? 'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold min-h-[36px]'
+      ? 'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold min-h-tap-target-min'
       : 'flex items-center gap-2 px-5 py-3 rounded-full font-semibold min-h-tap-target-min'
 
   if (pendingChannel) {

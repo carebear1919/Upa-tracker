@@ -15,7 +15,7 @@ export default function SectionHeader({ title, icon, subtitle, action, className
         (action.to ? (
           <Link
             to={action.to}
-            className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline flex-shrink-0"
+            className="flex items-center gap-1 min-h-tap-target-min text-sm font-semibold text-primary hover:underline flex-shrink-0"
           >
             {action.icon && <Icon name={action.icon} className="text-[16px]" />}
             {action.label}
@@ -24,7 +24,7 @@ export default function SectionHeader({ title, icon, subtitle, action, className
           <button
             type="button"
             onClick={action.onClick}
-            className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline flex-shrink-0"
+            className="flex items-center gap-1 min-h-tap-target-min text-sm font-semibold text-primary hover:underline flex-shrink-0"
           >
             {action.icon && <Icon name={action.icon} className="text-[16px]" />}
             {action.label}
