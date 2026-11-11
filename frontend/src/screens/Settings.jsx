@@ -5,6 +5,7 @@ import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Toast, { useToast } from '../components/Toast.jsx'
 import Onboarding from '../components/Onboarding.jsx'
+import { openWhatsNew, LATEST_VERSION } from '../lib/whatsNew.js'
 
 const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
@@ -177,14 +178,23 @@ export default function Settings({ onLock, onLogout }) {
             <Icon name="help" className="text-[22px] text-on-surface-variant" />
             Help
           </h2>
-          <p className="text-on-surface-variant mb-2">Forgot how something works? Watch the quick tour again.</p>
-          <button
-            onClick={() => setShowGuide(true)}
-            className="w-full md:w-auto min-h-[56px] px-6 mt-2 bg-surface-container-low border-2 border-outline-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
-          >
-            <Icon name="help" className="text-[22px]" />
-            <span className="font-semibold">View Welcome Guide</span>
-          </button>
+          <p className="text-on-surface-variant mb-2">Forgot how something works? Watch the quick tour again, or see what changed in the latest update.</p>
+          <div className="flex flex-col md:flex-row gap-3 mt-2">
+            <button
+              onClick={() => setShowGuide(true)}
+              className="w-full md:w-auto min-h-[56px] px-6 bg-surface-container-low border-2 border-outline-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
+            >
+              <Icon name="help" className="text-[22px]" />
+              <span className="font-semibold">View Welcome Guide</span>
+            </button>
+            <button
+              onClick={openWhatsNew}
+              className="w-full md:w-auto min-h-[56px] px-6 bg-surface-container-low border-2 border-outline-variant rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors"
+            >
+              <Icon name="notifications" className="text-[22px]" />
+              <span className="font-semibold">What's New (Version {LATEST_VERSION})</span>
+            </button>
+          </div>
         </Card>
 
         <Card className="flex flex-col gap-2 w-full">

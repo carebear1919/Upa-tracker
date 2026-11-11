@@ -17,6 +17,8 @@ import Reminders from './screens/Reminders.jsx'
 import Settings from './screens/Settings.jsx'
 import Icon from './components/Icon.jsx'
 import Notices from './components/Notices.jsx'
+import WhatsNew from './components/WhatsNew.jsx'
+import { markLatestSeen } from './lib/whatsNew.js'
 import { useStore } from './lib/store.js'
 import { logout } from './lib/supabase.js'
 import { ONBOARDED_KEY } from './components/Onboarding.jsx'
@@ -42,6 +44,7 @@ export default function App() {
 
   function finishOnboarding() {
     localStorage.setItem(ONBOARDED_KEY, '1')
+    markLatestSeen() // brand-new users just saw everything; nothing to announce yet
     setOnboardingDone(true)
   }
 
@@ -70,6 +73,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Notices />
+      <WhatsNew />
       <Routes>
         <Route element={<Layout onLock={() => setUnlocked(false)} onLogout={handleLogout} />}>
           <Route path="/" element={<Dashboard />} />
