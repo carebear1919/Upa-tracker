@@ -1,0 +1,3 @@
+# Local tooling installed per developer (re-install with the Impeccable installer)
+.claude/skills/
+.claude/agents/
