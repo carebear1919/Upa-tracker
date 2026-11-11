@@ -36,10 +36,22 @@ create index if not exists transfers_user_date_idx on transfers(user_id, date);
 alter table withdrawals enable row level security;
 alter table transfers enable row level security;
 
+-- Policies and realtime membership are dropped/guarded first so this script
+-- is safe to re-run (it only ever touches the new tables' own policies).
+drop policy if exists "own withdrawals" on withdrawals;
 create policy "own withdrawals" on withdrawals for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+drop policy if exists "own transfers" on transfers;
 create policy "own transfers" on transfers for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
-alter publication supabase_realtime add table withdrawals, transfers;
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'withdrawals') then
+    alter publication supabase_realtime add table withdrawals;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'transfers') then
+    alter publication supabase_realtime add table transfers;
+  end if;
+end $$;

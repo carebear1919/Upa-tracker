@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore, db, currentMonth, formatCurrency, PAYMENT_METHODS } from '../lib/store.js'
+import { useStore, db, currentMonth, formatCurrency, balancesByMethod, PAYMENT_METHODS } from '../lib/store.js'
+import { notify } from '../lib/notice.js'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
 
@@ -8,20 +9,28 @@ import Chip from '../components/Chip.jsx'
 // withdrawal, etc). It's tracked separately from expenses so "what the
 // property cost to run" and "what was taken out" never get mixed together.
 export default function Withdraw() {
-  const { withdrawals } = useStore()
+  const { withdrawals, payments, transfers, expenses, settings } = useStore()
   const navigate = useNavigate()
   const [note, setNote] = useState('')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [method, setMethod] = useState('Cash')
+  const [saving, setSaving] = useState(false)
+  const submitted = useRef(false)
 
   const month = currentMonth()
   const monthWithdrawals = withdrawals.filter((w) => w.date.startsWith(month))
   const monthTotal = monthWithdrawals.reduce((s, w) => s + Number(w.amount), 0)
+  const { pots } = balancesByMethod(payments, withdrawals, transfers, month, expenses, settings.openingBalance)
+  const tooMuch = Number(amount) > pots[method]
 
   function submit(e) {
     e.preventDefault()
+    if (submitted.current) return
+    submitted.current = true
+    setSaving(true)
     db.addWithdrawal({ note: note.trim(), amount: Number(amount), date, method })
+    notify('Withdrawal saved')
     navigate('/')
   }
 
@@ -33,7 +42,7 @@ export default function Withdraw() {
         <Card className="w-full">
           <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Field label="Amount">
-              <input required type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
+              <input required type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
             </Field>
             <Field label="Date">
               <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
@@ -47,11 +56,16 @@ export default function Withdraw() {
                 ))}
               </div>
             </Field>
+            {tooMuch && (
+              <p className="md:col-span-2 text-sm text-on-surface-variant -mt-2">
+                Heads up: that's more than the {formatCurrency(pots[method])} recorded in {method}. You can still save it.
+              </p>
+            )}
             <Field label="What is it for? (optional)" className="md:col-span-2">
               <input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} placeholder="e.g. Groceries, bank deposit" />
             </Field>
-            <button type="submit" className="md:col-span-2 w-full bg-primary text-on-primary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-primary-container transition-colors">
-              Save Withdrawal
+            <button type="submit" disabled={saving} className="md:col-span-2 w-full bg-primary text-on-primary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-primary-container transition-colors disabled:opacity-60">
+              {saving ? 'Saving…' : 'Save Withdrawal'}
             </button>
           </form>
         </Card>

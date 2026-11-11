@@ -4,6 +4,7 @@
 // runs fully offline before Supabase is wired up. Either way, callers only
 // ever see get/add/update/remove — screens never know which backend is live.
 import { useSyncExternalStore } from 'react'
+import { notifyError } from './notice.js'
 import { DEFAULT_REMINDER_TEMPLATE } from './messageLinks.js'
 import { supabase, isSupabaseConfigured } from './supabase.js'
 
@@ -320,21 +321,32 @@ function removeLocalRow(table, id) {
   emit()
 }
 
-async function writeRow(table, appRow, isUpdate) {
-  const { id, ...patch } = appRow
-  const row = isUpdate ? patchToRow(table, patch) : APP_TO_ROW[table](appRow, userId)
-  console.log(`[renta/db] ${isUpdate ? 'UPDATE' : 'INSERT'} ${table} →`, row)
-  const query = isUpdate ? supabase.from(table).update(row).eq('id', id) : supabase.from(table).insert(row)
-  const { error } = await query
-  if (error) console.error(`[renta/db] ✗ ${isUpdate ? 'update' : 'insert'} ${table} FAILED:`, error.message, error)
-  else console.log(`[renta/db] ✓ ${isUpdate ? 'update' : 'insert'} ${table} saved to Supabase`)
+const SAVE_FAILED = "Couldn't save to the cloud yet. It is only on this phone for now, so keep this screen open and try again."
+const DELETE_FAILED = "Couldn't delete it from the cloud yet. It may come back when you reopen the app."
+
+// Runs a write; on failure the person sees a visible "try again" notice rather
+// than a silent loss. Returns true when the write is known to be stored.
+async function attempt(run, message, label) {
+  const { error } = await run()
+  // 23505 = row already exists: an earlier try actually got through.
+  if (!error || error.code === '23505') {
+    console.log(`[renta/db] ✓ ${label}`)
+    return true
+  }
+  console.error(`[renta/db] ✗ ${label} FAILED:`, error.message, error)
+  notifyError(message, () => attempt(run, message, label))
+  return false
 }
 
-async function deleteRow(table, id) {
-  console.log(`[renta/db] DELETE ${table} id=${id}`)
-  const { error } = await supabase.from(table).delete().eq('id', id)
-  if (error) console.error(`[renta/db] ✗ delete ${table} FAILED:`, error.message, error)
-  else console.log(`[renta/db] ✓ delete ${table} confirmed in Supabase`)
+function writeRow(table, appRow, isUpdate) {
+  const { id, ...patch } = appRow
+  const row = isUpdate ? patchToRow(table, patch) : APP_TO_ROW[table](appRow, userId)
+  const run = () => (isUpdate ? supabase.from(table).update(row).eq('id', id) : supabase.from(table).insert(row))
+  return attempt(run, SAVE_FAILED, `${isUpdate ? 'update' : 'insert'} ${table}`)
+}
+
+function deleteRow(table, id) {
+  return attempt(() => supabase.from(table).delete().eq('id', id), DELETE_FAILED, `delete ${table}`)
 }
 
 async function initSupabase(session) {
@@ -496,9 +508,7 @@ const supabaseDb = {
     state = { ...state, settings: { ...state.settings, ...patch } }
     emit()
     const row = { user_id: userId, pin_hash: state.settings.pinHash, business_name: state.settings.businessName, currency: state.settings.currency, opening_balance: state.settings.openingBalance, reminder_template: state.settings.reminderTemplate }
-    supabase.from('settings').upsert(row).then(({ error }) => {
-      if (error) console.error('[supabase] update settings failed:', error.message)
-    })
+    attempt(() => supabase.from('settings').upsert(row), SAVE_FAILED, 'update settings')
   },
   logReminder(tenantId, channel) {
     const row = { id: makeId(), tenantId, channel, sentAt: new Date().toISOString(), month: currentMonth() }

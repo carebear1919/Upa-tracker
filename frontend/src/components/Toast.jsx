@@ -19,7 +19,7 @@ export function useToast() {
 export default function Toast({ message }) {
   if (!message) return null
   return (
-    <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-full shadow-level-2 text-sm font-semibold whitespace-nowrap">
+    <div role="status" className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-full shadow-level-2 text-sm font-semibold whitespace-nowrap">
       <Icon name="check_circle" className="text-[18px]" />
       {message}
     </div>

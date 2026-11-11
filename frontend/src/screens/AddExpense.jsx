@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, db, currentMonth, formatCurrency, EXPENSE_CATEGORIES } from '../lib/store.js'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
+import { notify } from '../lib/notice.js'
 
 export default function AddExpense() {
   const { expenses } = useStore()
@@ -11,6 +12,8 @@ export default function AddExpense() {
   const [category, setCategory] = useState('Medicine')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [saving, setSaving] = useState(false)
+  const submitted = useRef(false)
 
   const month = currentMonth()
   const monthExpenses = expenses.filter((e) => e.date.startsWith(month))
@@ -22,7 +25,11 @@ export default function AddExpense() {
 
   function submit(e) {
     e.preventDefault()
-    db.addExpense({ description, category, amount: Number(amount), date })
+    if (submitted.current) return
+    submitted.current = true
+    setSaving(true)
+    db.addExpense({ description: description.trim(), category, amount: Number(amount), date })
+    notify('Expense saved')
     navigate('/')
   }
 
@@ -53,13 +60,13 @@ export default function AddExpense() {
               </div>
             </Field>
             <Field label="Amount">
-              <input required type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
+              <input required type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
             </Field>
             <Field label="Date">
               <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
             </Field>
-            <button type="submit" className="md:col-span-2 w-full bg-secondary text-on-secondary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-secondary-container transition-colors">
-              Save
+            <button type="submit" disabled={saving} className="md:col-span-2 w-full bg-secondary text-on-secondary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-secondary-container transition-colors disabled:opacity-60">
+              {saving ? 'Saving…' : 'Save'}
             </button>
           </form>
         </Card>

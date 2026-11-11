@@ -16,6 +16,7 @@ import Reports from './screens/Reports.jsx'
 import Reminders from './screens/Reminders.jsx'
 import Settings from './screens/Settings.jsx'
 import Icon from './components/Icon.jsx'
+import Notices from './components/Notices.jsx'
 import { useStore } from './lib/store.js'
 import { logout } from './lib/supabase.js'
 import { ONBOARDED_KEY } from './components/Onboarding.jsx'
@@ -68,6 +69,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Notices />
       <Routes>
         <Route element={<Layout onLock={() => setUnlocked(false)} onLogout={handleLogout} />}>
           <Route path="/" element={<Dashboard />} />

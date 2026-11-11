@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore, db, paymentStatus, formatCurrency, PAYMENT_METHODS } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
 import PropertyPhoto from '../components/PropertyPhoto.jsx'
+import { notify } from '../lib/notice.js'
 
 const STATUS_TONE = { paid: 'primary', partial: 'tertiary', unpaid: 'secondary' }
 const STATUS_LABEL = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid' }
@@ -19,12 +20,26 @@ export default function LogPayment() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [method, setMethod] = useState('Cash')
+  const [saving, setSaving] = useState(false)
+  const submitted = useRef(false)
+  const [dupOk, setDupOk] = useState(false)
 
   const tenant = tenants.find((t) => t.id === tenantId)
   const status = tenant ? paymentStatus(tenant, payments, date.slice(0, 7)) : null
 
+  // Same tenant, amount and day already logged: ask before adding it twice.
+  const duplicate =
+    tenantId && amount && payments.some((p) => p.tenantId === tenantId && p.datePaid === date && Number(p.amount) === Number(amount))
+
   function submit(e) {
     e.preventDefault()
+    if (submitted.current) return
+    if (duplicate && !dupOk) {
+      setDupOk(true)
+      return
+    }
+    submitted.current = true
+    setSaving(true)
     db.addPayment({
       tenantId,
       amount: Number(amount),
@@ -32,6 +47,7 @@ export default function LogPayment() {
       monthCovered: date.slice(0, 7),
       method,
     })
+    notify('Payment saved')
     navigate(`/tenants/${tenantId}`)
   }
 
@@ -54,11 +70,12 @@ export default function LogPayment() {
               <input
                 required
                 type="number"
-                min="0"
+                inputMode="decimal"
+                min="0.01"
                 step="0.01"
                 placeholder={status ? String(status.balance) : ''}
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => { setAmount(e.target.value); setDupOk(false) }}
                 className={inputCls}
               />
             </Field>
@@ -79,8 +96,13 @@ export default function LogPayment() {
                 Paying less than the full amount is fine — it'll show as partially paid.
               </p>
             )}
-            <button type="submit" className="md:col-span-2 w-full bg-primary text-on-primary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-primary-container transition-colors">
-              Save
+            {duplicate && (
+              <p role="alert" className="md:col-span-2 text-sm font-semibold text-secondary -mt-3">
+                You already logged {formatCurrency(Number(amount))} for {tenant?.name} on this date. Tap the button again only if it's a second payment.
+              </p>
+            )}
+            <button type="submit" disabled={saving} className="md:col-span-2 w-full bg-primary text-on-primary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-primary-container transition-colors disabled:opacity-60">
+              {saving ? 'Saving…' : duplicate && dupOk ? 'Save it again' : 'Save'}
             </button>
           </form>
         </Card>

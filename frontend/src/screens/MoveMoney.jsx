@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, db, formatCurrency, currentMonth, balancesByMethod, PAYMENT_METHODS } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
+import { notify } from '../lib/notice.js'
 
 // Relocates money between Cash / GCash / Check — e.g. a check that was
 // cashed, or GCash cashed out to cash. Nothing is added or removed from
@@ -16,6 +17,8 @@ export default function MoveMoney() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const submitted = useRef(false)
 
   const { pots } = balancesByMethod(payments, withdrawals, transfers, currentMonth(), expenses, settings.openingBalance)
   const sameMethod = from === to
@@ -23,8 +26,11 @@ export default function MoveMoney() {
 
   function submit(e) {
     e.preventDefault()
-    if (sameMethod) return
+    if (sameMethod || submitted.current) return
+    submitted.current = true
+    setSaving(true)
     db.addTransfer({ fromMethod: from, toMethod: to, amount: Number(amount), date, note: note.trim() })
+    notify('Money moved')
     navigate('/')
   }
 
@@ -61,10 +67,10 @@ export default function MoveMoney() {
             </Field>
             <button
               type="submit"
-              disabled={sameMethod}
+              disabled={sameMethod || saving}
               className="md:col-span-2 w-full bg-primary text-on-primary h-14 rounded-xl font-semibold text-lg mt-2 hover:bg-primary-container transition-colors disabled:opacity-50"
             >
-              Move Money
+              {saving ? 'Saving…' : 'Move Money'}
             </button>
           </form>
         </Card>
