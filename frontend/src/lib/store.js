@@ -25,6 +25,8 @@ function seed() {
       { id: 'e2', description: 'Leaky faucet repair', category: 'Repairs', amount: 120, date: '2026-08-04' },
     ],
     reminders: [],
+    withdrawals: [],
+    transfers: [],
     settings: { pinHash: '', businessName: 'Renta', currency: 'PHP', openingBalance: 0, reminderTemplate: DEFAULT_REMINDER_TEMPLATE },
   }
 }
@@ -81,11 +83,11 @@ function sampleData(today = new Date()) {
   return {
     tenants,
     payments: [
-      { id: makeId(), tenantId: alice.id, amount: 12000, datePaid: dateInMonth(prevMonth2, 1), monthCovered: prevMonth2 },
-      { id: makeId(), tenantId: alice.id, amount: 12000, datePaid: dateInMonth(prevMonth, 1), monthCovered: prevMonth },
-      { id: makeId(), tenantId: david.id, amount: 15000, datePaid: dateInMonth(prevMonth, 2), monthCovered: prevMonth },
-      { id: makeId(), tenantId: david.id, amount: 15000, datePaid: dateInMonth(curMonth, clampDay(day - 1)), monthCovered: curMonth },
-      { id: makeId(), tenantId: elena.id, amount: 8000, datePaid: dateInMonth(curMonth, clampDay(day)), monthCovered: curMonth },
+      { id: makeId(), tenantId: alice.id, amount: 12000, datePaid: dateInMonth(prevMonth2, 1), monthCovered: prevMonth2, method: 'Cash' },
+      { id: makeId(), tenantId: alice.id, amount: 12000, datePaid: dateInMonth(prevMonth, 1), monthCovered: prevMonth, method: 'GCash' },
+      { id: makeId(), tenantId: david.id, amount: 15000, datePaid: dateInMonth(prevMonth, 2), monthCovered: prevMonth, method: 'Check' },
+      { id: makeId(), tenantId: david.id, amount: 15000, datePaid: dateInMonth(curMonth, clampDay(day - 1)), monthCovered: curMonth, method: 'Check' },
+      { id: makeId(), tenantId: elena.id, amount: 8000, datePaid: dateInMonth(curMonth, clampDay(day)), monthCovered: curMonth, method: 'GCash' },
     ],
     expenses: [
       { id: makeId(), description: 'Maintenance medicine', category: 'Medicine', amount: 650, date: dateInMonth(prevMonth2, 10) },
@@ -95,6 +97,13 @@ function sampleData(today = new Date()) {
       { id: makeId(), description: 'Diabetes medication', category: 'Medicine', amount: 1200, date: dateInMonth(curMonth, clampDay(day - 2)) },
       { id: makeId(), description: 'Ceiling fan repair', category: 'Repairs', amount: 950, date: dateInMonth(curMonth, clampDay(day - 1)) },
     ],
+    withdrawals: [
+      { id: makeId(), note: 'Cash for groceries', amount: 5000, date: dateInMonth(prevMonth, 15), method: 'Cash' },
+      { id: makeId(), note: 'Withdrawn from GCash', amount: 8000, date: dateInMonth(curMonth, clampDay(day - 1)), method: 'GCash' },
+    ],
+    transfers: [
+      { id: makeId(), fromMethod: 'Check', toMethod: 'Cash', amount: 15000, date: dateInMonth(curMonth, clampDay(day - 1)), note: 'Check cashed at the bank' },
+    ],
   }
 }
 
@@ -102,7 +111,7 @@ function makeId() {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 10)
 }
 
-let state = { tenants: [], payments: [], expenses: [], reminders: [], settings: seed().settings, loading: true, authNeeded: false }
+let state = { tenants: [], payments: [], expenses: [], reminders: [], withdrawals: [], transfers: [], settings: seed().settings, loading: true, authNeeded: false }
 const listeners = new Set()
 
 function emit() {
@@ -134,6 +143,9 @@ function localLoad() {
       data.settings.openingBalance ??= 0
       data.settings.reminderTemplate = normalizeReminderTemplate(data.settings.reminderTemplate ?? DEFAULT_REMINDER_TEMPLATE)
       data.reminders ??= []
+      data.withdrawals = (data.withdrawals ?? []).map((w) => ({ ...w, method: w.method ?? 'Cash' }))
+      data.transfers ??= []
+      data.payments = data.payments.map((p) => ({ ...p, method: p.method ?? 'Cash' }))
       return data
     }
   } catch {
@@ -201,6 +213,30 @@ const localDb = {
     state = { ...state, expenses: state.expenses.filter((e) => e.id !== id) }
     localCommit()
   },
+  addWithdrawal(withdrawal) {
+    state = { ...state, withdrawals: [...state.withdrawals, { id: makeId(), ...withdrawal }] }
+    localCommit()
+  },
+  updateWithdrawal(id, patch) {
+    state = { ...state, withdrawals: state.withdrawals.map((w) => (w.id === id ? { ...w, ...patch } : w)) }
+    localCommit()
+  },
+  removeWithdrawal(id) {
+    state = { ...state, withdrawals: state.withdrawals.filter((w) => w.id !== id) }
+    localCommit()
+  },
+  addTransfer(transfer) {
+    state = { ...state, transfers: [...state.transfers, { id: makeId(), ...transfer }] }
+    localCommit()
+  },
+  updateTransfer(id, patch) {
+    state = { ...state, transfers: state.transfers.map((t) => (t.id === id ? { ...t, ...patch } : t)) }
+    localCommit()
+  },
+  removeTransfer(id) {
+    state = { ...state, transfers: state.transfers.filter((t) => t.id !== id) }
+    localCommit()
+  },
   updateSettings(patch) {
     state = { ...state, settings: { ...state.settings, ...patch } }
     localCommit()
@@ -213,7 +249,7 @@ const localDb = {
     localCommit()
   },
   clearAllData() {
-    state = { ...state, tenants: [], payments: [], expenses: [], reminders: [] }
+    state = { ...state, tenants: [], payments: [], expenses: [], reminders: [], withdrawals: [], transfers: [] }
     localCommit()
   },
   loadSampleData() {
@@ -230,16 +266,20 @@ const localDb = {
 
 const ROW_TO_APP = {
   tenants: (r) => ({ id: r.id, name: r.name, property: r.property, unit: r.unit, phone: r.phone, messengerLink: r.messenger_link, monthlyRent: Number(r.monthly_rent), dueDay: r.due_day, propertyType: r.property_type, photo: r.photo }),
-  payments: (r) => ({ id: r.id, tenantId: r.tenant_id, amount: Number(r.amount), datePaid: r.date_paid, monthCovered: r.month_covered }),
+  payments: (r) => ({ id: r.id, tenantId: r.tenant_id, amount: Number(r.amount), datePaid: r.date_paid, monthCovered: r.month_covered, method: r.method ?? 'Cash' }),
   expenses: (r) => ({ id: r.id, description: r.description, category: r.category, amount: Number(r.amount), date: r.date }),
   reminders: (r) => ({ id: r.id, tenantId: r.tenant_id, channel: r.channel, sentAt: r.sent_at, month: r.month }),
+  withdrawals: (r) => ({ id: r.id, note: r.note, amount: Number(r.amount), date: r.date, method: r.method ?? 'Cash' }),
+  transfers: (r) => ({ id: r.id, fromMethod: r.from_method, toMethod: r.to_method, amount: Number(r.amount), date: r.date, note: r.note }),
 }
 
 const APP_TO_ROW = {
   tenants: (t, uid) => ({ id: t.id, user_id: uid, name: t.name, property: t.property, unit: t.unit ?? '', phone: t.phone ?? '', messenger_link: t.messengerLink ?? '', monthly_rent: t.monthlyRent, due_day: t.dueDay, property_type: t.propertyType ?? 'Housing', photo: t.photo ?? null }),
-  payments: (p, uid) => ({ id: p.id, user_id: uid, tenant_id: p.tenantId, amount: p.amount, date_paid: p.datePaid, month_covered: p.monthCovered }),
+  payments: (p, uid) => ({ id: p.id, user_id: uid, tenant_id: p.tenantId, amount: p.amount, date_paid: p.datePaid, month_covered: p.monthCovered, method: p.method ?? 'Cash' }),
   expenses: (e, uid) => ({ id: e.id, user_id: uid, description: e.description, category: e.category, amount: e.amount, date: e.date }),
   reminders: (r, uid) => ({ id: r.id, user_id: uid, tenant_id: r.tenantId, channel: r.channel, sent_at: r.sentAt, month: r.month }),
+  withdrawals: (w, uid) => ({ id: w.id, user_id: uid, note: w.note ?? '', amount: w.amount, date: w.date, method: w.method ?? 'Cash' }),
+  transfers: (t, uid) => ({ id: t.id, user_id: uid, from_method: t.fromMethod, to_method: t.toMethod, amount: t.amount, date: t.date, note: t.note ?? '' }),
 }
 
 // Only maps keys actually present on a patch — unlike APP_TO_ROW (used for
@@ -248,9 +288,11 @@ const APP_TO_ROW = {
 // caller didn't happen to include.
 const FIELD_TO_COLUMN = {
   tenants: { name: 'name', property: 'property', unit: 'unit', phone: 'phone', messengerLink: 'messenger_link', monthlyRent: 'monthly_rent', dueDay: 'due_day', propertyType: 'property_type', photo: 'photo' },
-  payments: { tenantId: 'tenant_id', amount: 'amount', datePaid: 'date_paid', monthCovered: 'month_covered' },
+  payments: { tenantId: 'tenant_id', amount: 'amount', datePaid: 'date_paid', monthCovered: 'month_covered', method: 'method' },
   expenses: { description: 'description', category: 'category', amount: 'amount', date: 'date' },
   reminders: { tenantId: 'tenant_id', channel: 'channel', sentAt: 'sent_at', month: 'month' },
+  withdrawals: { note: 'note', amount: 'amount', date: 'date', method: 'method' },
+  transfers: { fromMethod: 'from_method', toMethod: 'to_method', amount: 'amount', date: 'date', note: 'note' },
 }
 
 function patchToRow(table, patch) {
@@ -302,15 +344,17 @@ async function initSupabase(session) {
     console.log('[renta/init] ✓ using session, auth.uid() =', userId)
 
     console.log('[renta/init] step 1/2: fetching tenants/payments/expenses/reminders/settings…')
-    const [tenantsRes, paymentsRes, expensesRes, remindersRes, settingsRes] = await Promise.all([
+    const [tenantsRes, paymentsRes, expensesRes, remindersRes, withdrawalsRes, transfersRes, settingsRes] = await Promise.all([
       supabase.from('tenants').select('*'),
       supabase.from('payments').select('*'),
       supabase.from('expenses').select('*'),
       supabase.from('reminders').select('*'),
+      supabase.from('withdrawals').select('*'),
+      supabase.from('transfers').select('*'),
       supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
     ])
 
-    for (const [name, res] of [['tenants', tenantsRes], ['payments', paymentsRes], ['expenses', expensesRes], ['reminders', remindersRes], ['settings', settingsRes]]) {
+    for (const [name, res] of [['tenants', tenantsRes], ['payments', paymentsRes], ['expenses', expensesRes], ['reminders', remindersRes], ['withdrawals', withdrawalsRes], ['transfers', transfersRes], ['settings', settingsRes]]) {
       if (res.error) console.error(`[renta/init] ✗ fetching "${name}" FAILED — likely means the table doesn't exist yet, or Row Level Security is blocking it:`, res.error.message, res.error)
       else console.log(`[renta/init] ✓ fetched "${name}":`, Array.isArray(res.data) ? `${res.data.length} row(s)` : res.data)
     }
@@ -335,6 +379,8 @@ async function initSupabase(session) {
       payments: (paymentsRes.data ?? []).map(ROW_TO_APP.payments),
       expenses: (expensesRes.data ?? []).map(ROW_TO_APP.expenses),
       reminders: (remindersRes.data ?? []).map(ROW_TO_APP.reminders),
+      withdrawals: (withdrawalsRes.data ?? []).map(ROW_TO_APP.withdrawals),
+      transfers: (transfersRes.data ?? []).map(ROW_TO_APP.transfers),
       settings,
       loading: false,
       authNeeded: false,
@@ -342,7 +388,7 @@ async function initSupabase(session) {
     emit()
     console.log('[renta/init] step 2/2: subscribing to realtime updates…')
 
-    for (const table of ['tenants', 'payments', 'expenses', 'reminders']) {
+    for (const table of ['tenants', 'payments', 'expenses', 'reminders', 'withdrawals', 'transfers']) {
       supabase
         .channel(`${table}-${userId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` }, (payload) => {
@@ -414,6 +460,38 @@ const supabaseDb = {
     emit()
     deleteRow('expenses', id)
   },
+  addWithdrawal(withdrawal) {
+    const row = { id: makeId(), ...withdrawal }
+    state = { ...state, withdrawals: [...state.withdrawals, row] }
+    emit()
+    writeRow('withdrawals', row, false)
+  },
+  updateWithdrawal(id, patch) {
+    state = { ...state, withdrawals: state.withdrawals.map((w) => (w.id === id ? { ...w, ...patch } : w)) }
+    emit()
+    writeRow('withdrawals', { id, ...patch }, true)
+  },
+  removeWithdrawal(id) {
+    state = { ...state, withdrawals: state.withdrawals.filter((w) => w.id !== id) }
+    emit()
+    deleteRow('withdrawals', id)
+  },
+  addTransfer(transfer) {
+    const row = { id: makeId(), ...transfer }
+    state = { ...state, transfers: [...state.transfers, row] }
+    emit()
+    writeRow('transfers', row, false)
+  },
+  updateTransfer(id, patch) {
+    state = { ...state, transfers: state.transfers.map((t) => (t.id === id ? { ...t, ...patch } : t)) }
+    emit()
+    writeRow('transfers', { id, ...patch }, true)
+  },
+  removeTransfer(id) {
+    state = { ...state, transfers: state.transfers.filter((t) => t.id !== id) }
+    emit()
+    deleteRow('transfers', id)
+  },
   updateSettings(patch) {
     state = { ...state, settings: { ...state.settings, ...patch } }
     emit()
@@ -429,10 +507,12 @@ const supabaseDb = {
     writeRow('reminders', row, false)
   },
   async clearAllData() {
-    state = { ...state, tenants: [], payments: [], expenses: [], reminders: [] }
+    state = { ...state, tenants: [], payments: [], expenses: [], reminders: [], withdrawals: [], transfers: [] }
     emit()
     await Promise.all([
       supabase.from('expenses').delete().eq('user_id', userId),
+      supabase.from('withdrawals').delete().eq('user_id', userId),
+      supabase.from('transfers').delete().eq('user_id', userId),
       supabase.from('tenants').delete().eq('user_id', userId), // cascades payments + reminders
     ])
   },
@@ -444,6 +524,8 @@ const supabaseDb = {
     await Promise.all([
       supabase.from('payments').insert(demo.payments.map((p) => APP_TO_ROW.payments(p, userId))),
       supabase.from('expenses').insert(demo.expenses.map((e) => APP_TO_ROW.expenses(e, userId))),
+      supabase.from('withdrawals').insert(demo.withdrawals.map((w) => APP_TO_ROW.withdrawals(w, userId))),
+      supabase.from('transfers').insert(demo.transfers.map((t) => APP_TO_ROW.transfers(t, userId))),
     ])
   },
 }
@@ -467,7 +549,7 @@ if (isSupabaseConfigured) {
     } else if (event === 'SIGNED_OUT') {
       dataLoaded = false
       userId = null
-      state = { tenants: [], payments: [], expenses: [], reminders: [], settings: seed().settings, loading: false, authNeeded: true }
+      state = { tenants: [], payments: [], expenses: [], reminders: [], withdrawals: [], transfers: [], settings: seed().settings, loading: false, authNeeded: true }
       emit()
     } else if (event === 'INITIAL_SESSION' && !session) {
       state = { ...state, loading: false, authNeeded: true }
@@ -544,13 +626,21 @@ export const URGENCY_STYLES = {
 }
 
 export function formatCurrency(amount) {
-  return `₱${Number(amount).toLocaleString('en-PH')}`
+  const n = Number(amount)
+  // Whole pesos stay clean (₱12,000); anything with cents always shows two digits (₱12,000.50).
+  return Number.isInteger(n)
+    ? `₱${n.toLocaleString('en-PH')}`
+    : `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 // Lets one household track a mix of rental housing and business spaces in
 // the same list while still being able to tell them apart at a glance.
 export const PROPERTY_TYPES = ['Housing', 'Business']
 export const PROPERTY_TYPE_ICON = { Housing: 'apartment', Business: 'storefront' }
+
+// How a tenant paid — Cash, GCash, or Check. Shown on every payment and
+// broken out in Reports so it's clear where the money actually landed.
+export const PAYMENT_METHODS = ['Cash', 'GCash', 'Check']
 
 export const EXPENSE_CATEGORIES = [
   { value: 'Medicine', label: 'Medicine & Health', icon: 'medication' },
@@ -563,24 +653,47 @@ export const EXPENSE_CATEGORIES = [
 // logged, minus every expense ever logged, up to and including `throughMonth`
 // (YYYY-MM). This is "money left" and rolls into the next month rather than
 // resetting to zero.
-export function balanceThroughMonth(payments, expenses, throughMonth, openingBalance = 0) {
+export function balanceThroughMonth(payments, expenses, throughMonth, openingBalance = 0, withdrawals = []) {
   const collected = payments
     .filter((p) => p.monthCovered <= throughMonth)
     .reduce((sum, p) => sum + Number(p.amount), 0)
   const spent = expenses
     .filter((e) => e.date.slice(0, 7) <= throughMonth)
     .reduce((sum, e) => sum + Number(e.amount), 0)
-  return Number(openingBalance) + collected - spent
+  const withdrawn = withdrawals
+    .filter((w) => w.date.slice(0, 7) <= throughMonth)
+    .reduce((sum, w) => sum + Number(w.amount), 0)
+  return Number(openingBalance) + collected - spent - withdrawn
+}
+
+// Where the collected money physically is, split by Cash / GCash / Check:
+// payments received, plus anything moved in, minus anything moved out or
+// withdrawn from that pot — all up to and including `throughMonth`.
+// Starting balance and expenses aren't tied to a pot, so they're returned
+// separately as `unassigned` — the pots plus `unassigned` always add up to
+// the Dashboard's "Money Left".
+export function balancesByMethod(payments, withdrawals, transfers, throughMonth, expenses = [], openingBalance = 0) {
+  const upTo = (d) => d.slice(0, 7) <= throughMonth
+  const pots = Object.fromEntries(PAYMENT_METHODS.map((m) => [m, 0]))
+  for (const p of payments) if (p.monthCovered <= throughMonth) pots[p.method ?? 'Cash'] += Number(p.amount)
+  for (const w of withdrawals) if (upTo(w.date)) pots[w.method ?? 'Cash'] -= Number(w.amount)
+  for (const t of transfers) {
+    if (!upTo(t.date)) continue
+    pots[t.fromMethod] -= Number(t.amount)
+    pots[t.toMethod] += Number(t.amount)
+  }
+  const spent = expenses.filter((e) => upTo(e.date)).reduce((sum, e) => sum + Number(e.amount), 0)
+  return { pots, unassigned: Number(openingBalance) - spent }
 }
 
 // Balance carried in from before `month` starts — the previous month's
 // ending balance, used as this month's "Starting Balance".
 // Pure string/integer math on the "YYYY-MM" key — no Date/toISOString, which
 // would convert through UTC and roll the month back a day in +offset zones.
-export function startingBalance(payments, expenses, month, openingBalance = 0) {
+export function startingBalance(payments, expenses, month, openingBalance = 0, withdrawals = []) {
   const [year, mon] = month.split('-').map(Number)
   const prevYear = mon === 1 ? year - 1 : year
   const prevMon = mon === 1 ? 12 : mon - 1
   const prevMonthKey = `${prevYear}-${String(prevMon).padStart(2, '0')}`
-  return balanceThroughMonth(payments, expenses, prevMonthKey, openingBalance)
+  return balanceThroughMonth(payments, expenses, prevMonthKey, openingBalance, withdrawals)
 }

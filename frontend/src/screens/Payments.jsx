@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStore, db, formatCurrency } from '../lib/store.js'
+import { useStore, db, formatCurrency, PAYMENT_METHODS } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
+import Chip from '../components/Chip.jsx'
 import IconButton from '../components/IconButton.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import PropertyPhoto from '../components/PropertyPhoto.jsx'
@@ -12,7 +13,7 @@ const inputCls = 'min-h-[48px] border-2 border-outline-variant rounded-lg px-3 t
 function PaymentRow({ payment, tenant }) {
   const [editing, setEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [form, setForm] = useState({ amount: payment.amount, datePaid: payment.datePaid })
+  const [form, setForm] = useState({ amount: payment.amount, datePaid: payment.datePaid, method: payment.method ?? 'Cash' })
 
   function save(e) {
     e.preventDefault()
@@ -20,6 +21,7 @@ function PaymentRow({ payment, tenant }) {
       amount: Number(form.amount),
       datePaid: form.datePaid,
       monthCovered: form.datePaid.slice(0, 7),
+      method: form.method,
     })
     setEditing(false)
   }
@@ -30,6 +32,13 @@ function PaymentRow({ payment, tenant }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input required type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
           <input required type="date" value={form.datePaid} onChange={(e) => setForm({ ...form, datePaid: e.target.value })} className={inputCls} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {PAYMENT_METHODS.map((m) => (
+            <Chip key={m} variant="filter" tone="primary" selected={form.method === m} onClick={() => setForm({ ...form, method: m })}>
+              {m}
+            </Chip>
+          ))}
         </div>
         <div className="flex gap-3">
           <button type="submit" className="bg-primary text-on-primary px-5 py-2 rounded-lg font-semibold hover:bg-primary-container transition-colors">Save</button>
@@ -45,7 +54,10 @@ function PaymentRow({ payment, tenant }) {
         <PropertyPhoto photo={tenant?.photo} size={40} />
         <div className="min-w-0">
           <div className="font-semibold text-on-surface truncate">{tenant?.name ?? 'Unknown tenant'}</div>
-          <div className="text-sm text-on-surface-variant">{payment.datePaid}</div>
+          <div className="text-sm text-on-surface-variant flex items-center gap-2">
+            {payment.datePaid}
+            <Chip tone="neutral" size="sm">{payment.method ?? 'Cash'}</Chip>
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-3 flex-shrink-0">

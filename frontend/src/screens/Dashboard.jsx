@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStore, db, currentMonth, paymentStatus, formatCurrency, balanceThroughMonth, daysUntilDue, dueUrgency, lastReminder } from '../lib/store.js'
+import { useStore, db, currentMonth, paymentStatus, formatCurrency, balanceThroughMonth, balancesByMethod, PAYMENT_METHODS, daysUntilDue, dueUrgency, lastReminder } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import SectionHeader from '../components/SectionHeader.jsx'
@@ -79,7 +79,7 @@ function StartingBalanceEditor({ settings, standalone = false }) {
 }
 
 export default function Dashboard() {
-  const { tenants, payments, expenses, settings, reminders } = useStore()
+  const { tenants, payments, expenses, withdrawals, transfers, settings, reminders } = useStore()
   const month = currentMonth()
 
   if (tenants.length === 0) {
@@ -107,7 +107,11 @@ export default function Dashboard() {
   const monthExpenses = expenses
     .filter((e) => e.date.startsWith(month))
     .reduce((sum, e) => sum + Number(e.amount), 0)
-  const balance = balanceThroughMonth(payments, expenses, month, settings.openingBalance)
+  const monthWithdrawn = withdrawals
+    .filter((w) => w.date.startsWith(month))
+    .reduce((sum, w) => sum + Number(w.amount), 0)
+  const balance = balanceThroughMonth(payments, expenses, month, settings.openingBalance, withdrawals)
+  const { pots, unassigned } = balancesByMethod(payments, withdrawals, transfers, month, expenses, settings.openingBalance)
   const pct = expected ? Math.round((collected / expected) * 100) : 0
 
   const unpaid = tenants
@@ -123,7 +127,7 @@ export default function Dashboard() {
       </div>
 
       <SectionHeader title="This Month" icon="assessment" />
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter w-full">
         <Card className="flex flex-col gap-2">
           <span className="font-semibold text-lg text-on-surface-variant">Rent Collected</span>
           <span className="text-2xl md:text-3xl font-bold text-primary">{formatCurrency(collected)}</span>
@@ -139,6 +143,12 @@ export default function Dashboard() {
         </Card>
 
         <Card className="flex flex-col gap-2">
+          <span className="font-semibold text-lg text-on-surface-variant">Withdrawn</span>
+          <span className="text-2xl md:text-3xl font-bold text-on-background">{formatCurrency(monthWithdrawn)}</span>
+          <span className="text-sm text-on-surface-variant mt-auto pt-2">Money taken out this month</span>
+        </Card>
+
+        <Card className="flex flex-col gap-2">
           <div className="flex items-start justify-between">
             <span className="font-semibold text-lg text-on-surface-variant">Money Left</span>
             <StartingBalanceEditor settings={settings} />
@@ -147,6 +157,29 @@ export default function Dashboard() {
           <span className="text-on-surface-variant mt-auto pt-2">Carried forward, all months</span>
         </Card>
       </section>
+
+      <SectionHeader
+        title="Where the Money Is"
+        icon="payments"
+        className="mt-2"
+        action={{ label: 'Move money', to: '/move-money', icon: 'chevron_right' }}
+      />
+      <Card className="w-full flex flex-col gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-gutter">
+          {PAYMENT_METHODS.map((m) => (
+            <Card key={m} variant="nested" padding="md" className="flex flex-col gap-1">
+              <span className="font-semibold text-on-surface-variant">{m}</span>
+              <span className="text-xl font-bold text-on-background">{formatCurrency(pots[m])}</span>
+            </Card>
+          ))}
+        </div>
+        {unassigned !== 0 && (
+          <p className="text-sm text-on-surface-variant">
+            Starting balance minus expenses ({formatCurrency(unassigned)}) isn't tied to Cash, GCash or Check. Add it to the
+            three above and you get your {formatCurrency(balance)} Money Left.
+          </p>
+        )}
+      </Card>
 
       <SectionHeader title="Quick Actions" icon="add_circle" className="mt-2" />
       <section className="flex flex-col md:flex-row gap-gutter w-full">
@@ -163,6 +196,13 @@ export default function Dashboard() {
         >
           <Icon name="receipt_long" className="text-[28px]" />
           <span className="font-semibold text-lg">Add Expense</span>
+        </Link>
+        <Link
+          to="/withdraw"
+          className="w-full min-h-tap-target-min flex-1 bg-surface-container-high text-on-surface rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform"
+        >
+          <Icon name="logout" className="text-[28px]" />
+          <span className="font-semibold text-lg">Withdraw</span>
         </Link>
       </section>
 

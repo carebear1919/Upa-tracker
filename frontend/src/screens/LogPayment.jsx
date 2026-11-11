@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useStore, db, paymentStatus, formatCurrency } from '../lib/store.js'
+import { useStore, db, paymentStatus, formatCurrency, PAYMENT_METHODS } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
@@ -18,6 +18,7 @@ export default function LogPayment() {
   const [tenantId, setTenantId] = useState(preselect)
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [method, setMethod] = useState('Cash')
 
   const tenant = tenants.find((t) => t.id === tenantId)
   const status = tenant ? paymentStatus(tenant, payments, date.slice(0, 7)) : null
@@ -29,6 +30,7 @@ export default function LogPayment() {
       amount: Number(amount),
       datePaid: date,
       monthCovered: date.slice(0, 7),
+      method,
     })
     navigate(`/tenants/${tenantId}`)
   }
@@ -62,6 +64,15 @@ export default function LogPayment() {
             </Field>
             <Field label="Date">
               <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+            </Field>
+            <Field label="Paid by" className="md:col-span-2">
+              <div className="flex flex-wrap gap-3">
+                {PAYMENT_METHODS.map((m) => (
+                  <Chip key={m} variant="selector" tone="primary" selected={method === m} onClick={() => setMethod(m)}>
+                    {m}
+                  </Chip>
+                ))}
+              </div>
             </Field>
             {status && status.status !== 'paid' && (
               <p className="md:col-span-2 text-sm text-on-surface-variant -mt-3">

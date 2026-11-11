@@ -289,7 +289,10 @@ export default function TenantDetail() {
                 </div>
                 <div>
                   <div className="font-semibold text-lg text-on-surface">{p.datePaid}</div>
-                  <div className="text-on-surface-variant">Monthly Rent</div>
+                  <div className="text-on-surface-variant flex items-center gap-2">
+                    Monthly Rent
+                    <Chip tone="neutral" size="sm">{p.method ?? 'Cash'}</Chip>
+                  </div>
                 </div>
               </div>
               <div className="text-xl font-semibold text-on-surface">{formatCurrency(p.amount)}</div>

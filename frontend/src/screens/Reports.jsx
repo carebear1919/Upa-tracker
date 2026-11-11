@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useStore, db, formatCurrency, startingBalance, EXPENSE_CATEGORIES, paymentStatus } from '../lib/store.js'
+import { useStore, db, formatCurrency, startingBalance, EXPENSE_CATEGORIES, PAYMENT_METHODS, paymentStatus } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
@@ -74,6 +74,99 @@ function ExpenseRow({ expense }) {
   )
 }
 
+function WithdrawalRow({ withdrawal }) {
+  const [editing, setEditing] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [form, setForm] = useState({ note: withdrawal.note, amount: withdrawal.amount, date: withdrawal.date, method: withdrawal.method ?? 'Cash' })
+
+  function save(e) {
+    e.preventDefault()
+    db.updateWithdrawal(withdrawal.id, { ...form, amount: Number(form.amount) })
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <form onSubmit={save} className="bg-surface-container-low rounded-lg p-4 flex flex-col gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} className={inputCls} placeholder="What is it for?" />
+          <input required type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Amount" />
+          <input required type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className={inputCls} />
+          <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value })} className={inputCls}>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex gap-3">
+          <button type="submit" className="bg-primary text-on-primary px-5 py-2 rounded-lg font-semibold hover:bg-primary-container transition-colors">Save</button>
+          <button type="button" onClick={() => setEditing(false)} className="text-on-surface-variant font-semibold hover:underline">Cancel</button>
+        </div>
+      </form>
+    )
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="min-w-0">
+        <div className="font-semibold text-on-surface truncate">{withdrawal.note || 'Withdrawal'}</div>
+        <div className="text-sm text-on-surface-variant flex items-center gap-2">
+          {withdrawal.date}
+          <Chip tone="neutral" size="sm">{withdrawal.method ?? 'Cash'}</Chip>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <span className="font-semibold text-on-surface">{formatCurrency(withdrawal.amount)}</span>
+        {!confirmingDelete ? (
+          <>
+            <IconButton icon="edit" aria-label="Edit withdrawal" onClick={() => setEditing(true)} iconClassName="text-[18px]" />
+            <IconButton icon="delete_forever" aria-label="Delete withdrawal" variant="danger" onClick={() => setConfirmingDelete(true)} iconClassName="text-[18px]" />
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button onClick={() => db.removeWithdrawal(withdrawal.id)} className="text-error font-semibold text-sm hover:underline">Delete</button>
+            <button onClick={() => setConfirmingDelete(false)} className="text-on-surface-variant font-semibold text-sm hover:underline">Cancel</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TransferRow({ transfer }) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="min-w-0">
+        <div className="font-semibold text-on-surface truncate">
+          {transfer.fromMethod} → {transfer.toMethod}
+        </div>
+        <div className="text-sm text-on-surface-variant truncate">
+          {transfer.date}{transfer.note ? ` · ${transfer.note}` : ''}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <span className="font-semibold text-on-surface">{formatCurrency(transfer.amount)}</span>
+        {!confirmingDelete ? (
+          <IconButton icon="delete_forever" aria-label="Delete transfer" variant="danger" onClick={() => setConfirmingDelete(true)} iconClassName="text-[18px]" />
+        ) : (
+          <div className="flex items-center gap-2">
+            <button onClick={() => db.removeTransfer(transfer.id)} className="text-error font-semibold text-sm hover:underline">Delete</button>
+            <button onClick={() => setConfirmingDelete(false)} className="text-on-surface-variant font-semibold text-sm hover:underline">Cancel</button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Excel export builds raw HTML from user-typed text, so it has to be escaped
+// or a name like "<b>x" would corrupt (or inject into) the downloaded file.
+function esc(value) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 // Brand colors as RGB triples — jsPDF/autoTable want plain arrays, not CSS.
 const PRIMARY_RGB = [15, 82, 56]
 const SECONDARY_RGB = [167, 55, 59]
@@ -96,7 +189,7 @@ function monthLabel(month) {
 }
 
 export default function Reports() {
-  const { tenants, payments, expenses, settings } = useStore()
+  const { tenants, payments, expenses, withdrawals, transfers, settings } = useStore()
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
   const [choosingOrientation, setChoosingOrientation] = useState(false)
 
@@ -104,9 +197,16 @@ export default function Reports() {
   const monthExpenses = expenses.filter((e) => e.date.startsWith(month))
   const collected = monthPayments.reduce((s, p) => s + Number(p.amount), 0)
   const totalExpenses = monthExpenses.reduce((s, e) => s + Number(e.amount), 0)
-  const net = collected - totalExpenses
-  const opening = startingBalance(payments, expenses, month, settings.openingBalance)
+  const monthWithdrawals = withdrawals.filter((w) => w.date.startsWith(month))
+  const monthTransfers = transfers.filter((t) => t.date.startsWith(month))
+  const totalWithdrawn = monthWithdrawals.reduce((s, w) => s + Number(w.amount), 0)
+  const net = collected - totalExpenses - totalWithdrawn
+  const opening = startingBalance(payments, expenses, month, settings.openingBalance, withdrawals)
   const closing = opening + net
+
+  // How this month's rent actually arrived — Cash, GCash or Check.
+  const collectedByMethod = Object.fromEntries(PAYMENT_METHODS.map((m) => [m, 0]))
+  for (const p of monthPayments) collectedByMethod[p.method ?? 'Cash'] += Number(p.amount)
 
   const expensesByCategory = monthExpenses.reduce((acc, e) => {
     acc[e.category] = (acc[e.category] ?? 0) + Number(e.amount)
@@ -152,16 +252,34 @@ export default function Reports() {
         ['Starting Balance', `PHP ${opening.toLocaleString()}`],
         ['Rent Collected', `PHP ${collected.toLocaleString()}`],
         ['Expenses', `PHP ${totalExpenses.toLocaleString()}`],
+        ['Money Withdrawn', `PHP ${totalWithdrawn.toLocaleString()}`],
         ['Ending Balance', `PHP ${closing.toLocaleString()}`],
       ],
       styles: { fontSize: 11, cellPadding: 3 },
       columnStyles: { 0: { fontStyle: 'bold', textColor: INK_RGB }, 1: { halign: 'right', textColor: PRIMARY_RGB, fontStyle: 'bold' } },
       didParseCell: (data) => {
-        if (data.row.index === 3) data.cell.styles.textColor = PRIMARY_RGB
+        if (data.row.index === 4) data.cell.styles.textColor = PRIMARY_RGB
       },
     })
 
     let y = doc.lastAutoTable.finalY + 10
+
+    doc.setFontSize(13)
+    doc.setTextColor(...INK_RGB)
+    doc.text('Rent Collected by Payment Method', margin, y)
+    autoTable(doc, {
+      startY: y + 4,
+      head: [['Method', 'Amount (PHP)']],
+      body: PAYMENT_METHODS.map((m) => [m, collectedByMethod[m].toLocaleString()]),
+      foot: [['Total', collected.toLocaleString()]],
+      theme: 'striped',
+      headStyles: { fillColor: INK_RGB, textColor: 255 },
+      footStyles: { fillColor: [255, 255, 255], textColor: INK_RGB, fontStyle: 'bold', lineWidth: { top: 0.4 }, lineColor: INK_RGB },
+      alternateRowStyles: { fillColor: CREAM_RGB },
+      styles: { fontSize: 10 },
+      columnStyles: { 1: { halign: 'right' } },
+    })
+    y = doc.lastAutoTable.finalY + 10
 
     if (tenantStatuses.length > 0) {
       doc.setFontSize(13)
@@ -201,15 +319,15 @@ export default function Reports() {
       doc.text(`Payments (${monthPayments.length})`, margin, y)
       autoTable(doc, {
         startY: y + 4,
-        head: [['Date', 'Tenant', 'Amount (PHP)']],
-        body: monthPayments.map((p) => [p.datePaid, tenantName(p.tenantId), p.amount.toLocaleString()]),
-        foot: [['', 'Total', collected.toLocaleString()]],
+        head: [['Date', 'Tenant', 'Method', 'Amount (PHP)']],
+        body: monthPayments.map((p) => [p.datePaid, tenantName(p.tenantId), p.method ?? 'Cash', p.amount.toLocaleString()]),
+        foot: [['', '', 'Total', collected.toLocaleString()]],
         theme: 'striped',
         headStyles: { fillColor: PRIMARY_RGB, textColor: 255 },
         footStyles: { fillColor: [255, 255, 255], textColor: INK_RGB, fontStyle: 'bold', lineWidth: { top: 0.4 }, lineColor: PRIMARY_RGB },
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
-        columnStyles: { 2: { halign: 'right' } },
+        columnStyles: { 3: { halign: 'right' } },
       })
       y = doc.lastAutoTable.finalY + 10
     }
@@ -229,6 +347,42 @@ export default function Reports() {
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
         columnStyles: { 3: { halign: 'right' } },
+      })
+      y = doc.lastAutoTable.finalY + 10
+    }
+
+    if (monthWithdrawals.length > 0) {
+      doc.setFontSize(13)
+      doc.setTextColor(...INK_RGB)
+      doc.text(`Money Withdrawn (${monthWithdrawals.length})`, margin, y)
+      autoTable(doc, {
+        startY: y + 4,
+        head: [['Date', 'For', 'Taken from', 'Amount (PHP)']],
+        body: monthWithdrawals.map((w) => [w.date, w.note || 'Withdrawal', w.method ?? 'Cash', w.amount.toLocaleString()]),
+        foot: [['', '', 'Total', totalWithdrawn.toLocaleString()]],
+        theme: 'striped',
+        headStyles: { fillColor: INK_RGB, textColor: 255 },
+        footStyles: { fillColor: [255, 255, 255], textColor: INK_RGB, fontStyle: 'bold', lineWidth: { top: 0.4 }, lineColor: INK_RGB },
+        alternateRowStyles: { fillColor: CREAM_RGB },
+        styles: { fontSize: 10 },
+        columnStyles: { 3: { halign: 'right' } },
+      })
+      y = doc.lastAutoTable.finalY + 10
+    }
+
+    if (monthTransfers.length > 0) {
+      doc.setFontSize(13)
+      doc.setTextColor(...INK_RGB)
+      doc.text(`Money Moved Between Cash / GCash / Check (${monthTransfers.length})`, margin, y)
+      autoTable(doc, {
+        startY: y + 4,
+        head: [['Date', 'From', 'To', 'Note', 'Amount (PHP)']],
+        body: monthTransfers.map((t) => [t.date, t.fromMethod, t.toMethod, t.note, t.amount.toLocaleString()]),
+        theme: 'striped',
+        headStyles: { fillColor: INK_RGB, textColor: 255 },
+        alternateRowStyles: { fillColor: CREAM_RGB },
+        styles: { fontSize: 10 },
+        columnStyles: { 4: { halign: 'right' } },
       })
     }
 
@@ -263,6 +417,7 @@ export default function Reports() {
       ['Starting Balance', opening],
       ['Rent Collected', collected],
       ['Expenses', totalExpenses],
+      ['Money Withdrawn', totalWithdrawn],
       ['Ending Balance', closing],
     ]
       .map(([label, val]) => `<tr><td style="${totalStyle}">${label}</td><td style="${totalStyle}text-align:right;">${val}</td></tr>`)
@@ -273,41 +428,62 @@ export default function Reports() {
     const tenantStatusRows = tenantStatuses
       .map(
         ({ tenant, status, paid, balance }) =>
-          `<tr><td style="${rowStyle}">${tenant.name}</td><td style="${rowStyle}">${tenant.unit ? `Unit ${tenant.unit} - ` : ''}${tenant.property}</td><td style="${rowStyle}font-weight:bold;color:${statusColor[status]};">${statusLabel[status]}</td><td style="${rowStyle}text-align:right;">${paid}</td><td style="${rowStyle}text-align:right;">${balance}</td></tr>`,
+          `<tr><td style="${rowStyle}">${esc(tenant.name)}</td><td style="${rowStyle}">${tenant.unit ? `Unit ${esc(tenant.unit)} - ` : ''}${esc(tenant.property)}</td><td style="${rowStyle}font-weight:bold;color:${statusColor[status]};">${statusLabel[status]}</td><td style="${rowStyle}text-align:right;">${paid}</td><td style="${rowStyle}text-align:right;">${balance}</td></tr>`,
       )
       .join('')
 
     const paymentRows = monthPayments
       .map(
         (p) =>
-          `<tr><td style="${rowStyle}">${p.datePaid}</td><td style="${rowStyle}">${tenantName(p.tenantId)}</td><td style="${rowStyle}text-align:right;">${p.amount}</td></tr>`,
+          `<tr><td style="${rowStyle}">${p.datePaid}</td><td style="${rowStyle}">${esc(tenantName(p.tenantId))}</td><td style="${rowStyle}">${esc(p.method ?? 'Cash')}</td><td style="${rowStyle}text-align:right;">${p.amount}</td></tr>`,
       )
       .join('')
-    const paymentsTotalRow = `<tr><td style="${totalStyle}"></td><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${collected}</td></tr>`
+    const paymentsTotalRow = `<tr><td style="${totalStyle}"></td><td style="${totalStyle}"></td><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${collected}</td></tr>`
 
     const expenseRows = monthExpenses
       .map(
         (e) =>
-          `<tr><td style="${rowStyle}">${e.date}</td><td style="${rowStyle}">${e.description}</td><td style="${rowStyle}">${e.category}</td><td style="${rowStyle}text-align:right;">${e.amount}</td></tr>`,
+          `<tr><td style="${rowStyle}">${e.date}</td><td style="${rowStyle}">${esc(e.description)}</td><td style="${rowStyle}">${esc(e.category)}</td><td style="${rowStyle}text-align:right;">${e.amount}</td></tr>`,
       )
       .join('')
     const expensesTotalRow = `<tr><td style="${totalStyle}"></td><td style="${totalStyle}"></td><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${totalExpenses}</td></tr>`
+
+    const methodRows = PAYMENT_METHODS.map(
+      (m) => `<tr><td style="${rowStyle}">${m}</td><td style="${rowStyle}text-align:right;">${collectedByMethod[m]}</td></tr>`,
+    ).join('')
+    const withdrawalRows = monthWithdrawals
+      .map(
+        (w) =>
+          `<tr><td style="${rowStyle}">${w.date}</td><td style="${rowStyle}">${esc(w.note || 'Withdrawal')}</td><td style="${rowStyle}">${esc(w.method ?? 'Cash')}</td><td style="${rowStyle}text-align:right;">${w.amount}</td></tr>`,
+      )
+      .join('')
+    const withdrawalsTotalRow = `<tr><td style="${totalStyle}"></td><td style="${totalStyle}"></td><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${totalWithdrawn}</td></tr>`
+    const transferRows = monthTransfers
+      .map(
+        (t) =>
+          `<tr><td style="${rowStyle}">${t.date}</td><td style="${rowStyle}">${esc(t.fromMethod)}</td><td style="${rowStyle}">${esc(t.toMethod)}</td><td style="${rowStyle}">${esc(t.note)}</td><td style="${rowStyle}text-align:right;">${t.amount}</td></tr>`,
+      )
+      .join('')
 
     const html = `
       <html xmlns:x="urn:schemas-microsoft-com:office:excel">
       <head><meta charset="UTF-8"></head>
       <body>
         <table style="border-collapse:collapse;">
-          <tr><td colspan="4" style="font-family:Calibri;font-size:18px;font-weight:bold;color:#0f5238;padding:8px;">${settings.businessName || 'Renta'} — Monthly Report</td></tr>
+          <tr><td colspan="4" style="font-family:Calibri;font-size:18px;font-weight:bold;color:#0f5238;padding:8px;">${esc(settings.businessName || 'Renta')} — Monthly Report</td></tr>
           <tr><td colspan="4" style="font-family:Calibri;font-size:13px;color:#404943;padding:0 8px 12px;">${monthLabel(month)}</td></tr>
           ${summaryRows}
+          <tr><td colspan="4" style="padding:8px;"></td></tr>
+          <tr><td colspan="2" style="${sectionStyle}">Rent Collected by Payment Method</td></tr>
+          <tr><th style="${headStyle}">Method</th><th style="${headStyle}">Amount (PHP)</th></tr>
+          ${methodRows}
           <tr><td colspan="4" style="padding:8px;"></td></tr>
           <tr><td colspan="5" style="${sectionStyle}">Tenant Payment Status${behindCount > 0 ? ` — ${behindCount} not fully paid` : ''}</td></tr>
           <tr><th style="${headStyle}">Tenant</th><th style="${headStyle}">Property</th><th style="${headStyle}">Status</th><th style="${headStyle}">Paid (PHP)</th><th style="${headStyle}">Balance (PHP)</th></tr>
           ${tenantStatusRows}
           <tr><td colspan="4" style="padding:8px;"></td></tr>
-          <tr><td colspan="3" style="${sectionStyle}">Payments (${monthPayments.length})</td></tr>
-          <tr><th style="${headStyle}">Date</th><th style="${headStyle}">Tenant</th><th style="${headStyle}">Amount (PHP)</th></tr>
+          <tr><td colspan="4" style="${sectionStyle}">Payments (${monthPayments.length})</td></tr>
+          <tr><th style="${headStyle}">Date</th><th style="${headStyle}">Tenant</th><th style="${headStyle}">Method</th><th style="${headStyle}">Amount (PHP)</th></tr>
           ${paymentRows}
           ${monthPayments.length > 0 ? paymentsTotalRow : ''}
           <tr><td colspan="4" style="padding:8px;"></td></tr>
@@ -315,6 +491,15 @@ export default function Reports() {
           <tr><th style="${headStyle}">Date</th><th style="${headStyle}">Description</th><th style="${headStyle}">Category</th><th style="${headStyle}">Amount (PHP)</th></tr>
           ${expenseRows}
           ${monthExpenses.length > 0 ? expensesTotalRow : ''}
+          <tr><td colspan="4" style="padding:8px;"></td></tr>
+          <tr><td colspan="4" style="${sectionStyle}">Money Withdrawn (${monthWithdrawals.length})</td></tr>
+          <tr><th style="${headStyle}">Date</th><th style="${headStyle}">For</th><th style="${headStyle}">Taken from</th><th style="${headStyle}">Amount (PHP)</th></tr>
+          ${withdrawalRows}
+          ${monthWithdrawals.length > 0 ? withdrawalsTotalRow : ''}
+          <tr><td colspan="4" style="padding:8px;"></td></tr>
+          <tr><td colspan="5" style="${sectionStyle}">Money Moved Between Cash / GCash / Check (${monthTransfers.length})</td></tr>
+          <tr><th style="${headStyle}">Date</th><th style="${headStyle}">From</th><th style="${headStyle}">To</th><th style="${headStyle}">Note</th><th style="${headStyle}">Amount (PHP)</th></tr>
+          ${transferRows}
         </table>
       </body>
       </html>`
@@ -343,11 +528,22 @@ export default function Reports() {
 
       <Card className="flex flex-col gap-4 w-full">
         <SectionHeader title={monthLabel(month)} icon="assessment" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-gutter">
           <Stat label="Starting Balance" value={opening} color="text-on-background" />
           <Stat label="Rent Collected" value={collected} color="text-primary" />
           <Stat label="Expenses" value={totalExpenses} color="text-secondary" />
+          <Stat label="Withdrawn" value={totalWithdrawn} color="text-on-background" />
           <Stat label="Ending Balance" value={closing} color="text-on-background" />
+        </div>
+        <div className="flex flex-col gap-2 pt-2">
+          <span className="text-sm font-semibold text-on-surface-variant">Rent collected by payment method</span>
+          <div className="flex flex-wrap gap-2">
+            {PAYMENT_METHODS.map((m) => (
+              <Chip key={m} tone="neutral" size="md">
+                {m}: {formatCurrency(collectedByMethod[m])}
+              </Chip>
+            ))}
+          </div>
         </div>
         <p className="text-sm text-on-surface-variant">
           Money left carries into next month — {monthLabel(month)} ends at {formatCurrency(closing)}.
@@ -478,6 +674,39 @@ export default function Reports() {
           ))}
         </Card>
       )}
+
+      <Card className="flex flex-col w-full">
+        <SectionHeader
+          title={`Money Withdrawn — ${monthLabel(month)}`}
+          icon="logout"
+          subtitle={monthWithdrawals.length > 0 ? `${formatCurrency(totalWithdrawn)} taken out this month` : undefined}
+          action={{ label: 'Withdraw', to: '/withdraw', icon: 'add' }}
+        />
+        {monthWithdrawals.length === 0 ? (
+          <p className="text-sm text-on-surface-variant my-2">No money withdrawn in {monthLabel(month)}.</p>
+        ) : (
+          <>
+            <p className="text-sm text-on-surface-variant my-2">Tap the pencil to fix one, or the trash to remove it.</p>
+            {monthWithdrawals.map((w) => (
+              <WithdrawalRow key={w.id} withdrawal={w} />
+            ))}
+          </>
+        )}
+      </Card>
+
+      <Card className="flex flex-col w-full">
+        <SectionHeader
+          title={`Money Moved — ${monthLabel(month)}`}
+          icon="payments"
+          subtitle="Cash, GCash and Check moves"
+          action={{ label: 'Move money', to: '/move-money', icon: 'add' }}
+        />
+        {monthTransfers.length === 0 ? (
+          <p className="text-sm text-on-surface-variant my-2">No money moved between Cash, GCash or Check in {monthLabel(month)}.</p>
+        ) : (
+          monthTransfers.map((t) => <TransferRow key={t.id} transfer={t} />)
+        )}
+      </Card>
     </>
   )
 }

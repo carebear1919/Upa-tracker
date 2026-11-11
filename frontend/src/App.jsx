@@ -9,6 +9,8 @@ import Tenants from './screens/Tenants.jsx'
 import TenantDetail from './screens/TenantDetail.jsx'
 import LogPayment from './screens/LogPayment.jsx'
 import AddExpense from './screens/AddExpense.jsx'
+import Withdraw from './screens/Withdraw.jsx'
+import MoveMoney from './screens/MoveMoney.jsx'
 import Payments from './screens/Payments.jsx'
 import Reports from './screens/Reports.jsx'
 import Reminders from './screens/Reminders.jsx'
@@ -74,6 +76,8 @@ export default function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/log-payment" element={<LogPayment />} />
           <Route path="/add-expense" element={<AddExpense />} />
+          <Route path="/withdraw" element={<Withdraw />} />
+          <Route path="/move-money" element={<MoveMoney />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reminders" element={<Reminders />} />
           <Route path="/settings" element={<Settings onLock={() => setUnlocked(false)} onLogout={handleLogout} />} />
