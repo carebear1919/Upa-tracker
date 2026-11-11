@@ -689,6 +689,42 @@ export function balancesByMethod(payments, withdrawals, transfers, throughMonth,
   return { pots, unassigned: Number(openingBalance) - spent }
 }
 
+// One row per place the money sits (Cash, GCash, Check), plus the starting
+// balance less expenses that isn't tied to any place. Each row reconciles:
+// start + rent in + moved - taken out = end. Used by the Reports screen and
+// both exports so the three always agree.
+export function moneyByPlace(payments, expenses, withdrawals, transfers, month, openingBalance = 0) {
+  const [year, mon] = month.split('-').map(Number)
+  const prevKey = `${mon === 1 ? year - 1 : year}-${String(mon === 1 ? 12 : mon - 1).padStart(2, '0')}`
+  const start = balancesByMethod(payments, withdrawals, transfers, prevKey, expenses, openingBalance)
+  const end = balancesByMethod(payments, withdrawals, transfers, month, expenses, openingBalance)
+  const sum = (list) => list.reduce((s, x) => s + Number(x.amount), 0)
+
+  const rows = PAYMENT_METHODS.map((m) => {
+    const rentIn = sum(payments.filter((p) => p.monthCovered === month && (p.method ?? 'Cash') === m))
+    const out = sum(withdrawals.filter((w) => w.date.startsWith(month) && (w.method ?? 'Cash') === m))
+    const moved =
+      sum(transfers.filter((t) => t.date.startsWith(month) && t.toMethod === m)) -
+      sum(transfers.filter((t) => t.date.startsWith(month) && t.fromMethod === m))
+    return { name: m, start: start.pots[m], rentIn, moved, out, end: end.pots[m] }
+  })
+  rows.push({
+    name: 'Starting balance less expenses',
+    other: true,
+    start: start.unassigned,
+    rentIn: 0,
+    moved: 0,
+    out: sum(expenses.filter((e) => e.date.startsWith(month))),
+    end: end.unassigned,
+  })
+
+  const total = rows.reduce(
+    (t, r) => ({ start: t.start + r.start, rentIn: t.rentIn + r.rentIn, moved: t.moved + r.moved, out: t.out + r.out, end: t.end + r.end }),
+    { start: 0, rentIn: 0, moved: 0, out: 0, end: 0 },
+  )
+  return { rows, total }
+}
+
 // Balance carried in from before `month` starts — the previous month's
 // ending balance, used as this month's "Starting Balance".
 // Pure string/integer math on the "YYYY-MM" key — no Date/toISOString, which

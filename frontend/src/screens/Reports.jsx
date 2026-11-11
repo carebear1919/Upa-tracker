@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useStore, db, formatCurrency, startingBalance, EXPENSE_CATEGORIES, PAYMENT_METHODS, paymentStatus } from '../lib/store.js'
+import { useStore, db, formatCurrency, startingBalance, moneyByPlace, EXPENSE_CATEGORIES, paymentStatus } from '../lib/store.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 import Chip from '../components/Chip.jsx'
@@ -204,9 +204,8 @@ export default function Reports() {
   const opening = startingBalance(payments, expenses, month, settings.openingBalance, withdrawals)
   const closing = opening + net
 
-  // How this month's rent actually arrived — Cash, GCash or Check.
-  const collectedByMethod = Object.fromEntries(PAYMENT_METHODS.map((m) => [m, 0]))
-  for (const p of monthPayments) collectedByMethod[p.method ?? 'Cash'] += Number(p.amount)
+  // Where the money sits — Cash, GCash, Check — from the start to the end of the month.
+  const places = moneyByPlace(payments, expenses, withdrawals, transfers, month, settings.openingBalance)
 
   const expensesByCategory = monthExpenses.reduce((acc, e) => {
     acc[e.category] = (acc[e.category] ?? 0) + Number(e.amount)
@@ -241,50 +240,91 @@ export default function Reports() {
     doc.setFontSize(11)
     doc.text(`Monthly Report — ${monthLabel(month)}`, margin, 22)
 
-    doc.setTextColor(...INK_RGB)
-    doc.setFontSize(12)
-    doc.text('Summary', margin, 38)
+    const contentW = pageW - margin * 2
+    const pageH = doc.internal.pageSize.getHeight()
+    const num = (n) => Number(n).toLocaleString('en-PH', { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })
+    const money = (n) => `${n < 0 ? '-' : ''}PHP ${num(Math.abs(n))}`
+    const signed = (n) => (n === 0 ? '-' : `${n > 0 ? '+' : '-'}${num(Math.abs(n))}`)
+    const dash = (n) => (n === 0 ? '-' : num(n))
 
+    // Section titles are bold and start on a fresh page rather than stranded at the bottom of one.
+    const startSection = (text, y) => {
+      if (y > pageH - 50) {
+        doc.addPage()
+        y = 20
+      }
+      doc.setFont('helvetica', 'bold')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(13)
+      doc.setTextColor(...INK_RGB)
+      doc.text(text, margin, y)
+      doc.setFont('helvetica', 'normal')
+      doc.setFont('helvetica', 'normal')
+      return y
+    }
+
+    let y = startSection('Summary', 38)
     autoTable(doc, {
-      startY: 42,
+      startY: y + 3,
       theme: 'plain',
+      tableWidth: Math.min(115, contentW),
       body: [
-        ['Starting Balance', `PHP ${opening.toLocaleString()}`],
-        ['Rent Collected', `PHP ${collected.toLocaleString()}`],
-        ['Expenses', `PHP ${totalExpenses.toLocaleString()}`],
-        ['Money Withdrawn', `PHP ${totalWithdrawn.toLocaleString()}`],
-        ['Ending Balance', `PHP ${closing.toLocaleString()}`],
+        ['Money at the start of the month', money(opening)],
+        ['+ Rent collected', money(collected)],
+        ['- Expenses', money(totalExpenses)],
+        ['- Money withdrawn', money(totalWithdrawn)],
+        ['Money at the end of the month', money(closing)],
       ],
-      styles: { fontSize: 11, cellPadding: 3 },
-      columnStyles: { 0: { fontStyle: 'bold', textColor: INK_RGB }, 1: { halign: 'right', textColor: PRIMARY_RGB, fontStyle: 'bold' } },
+      styles: { fontSize: 11, textColor: INK_RGB, cellPadding: { top: 2.2, bottom: 2.2, left: 2, right: 2 } },
+      columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
       didParseCell: (data) => {
-        if (data.row.index === 4) data.cell.styles.textColor = PRIMARY_RGB
+        if (data.column.index === 1 && data.row.index === 1) data.cell.styles.textColor = PRIMARY_RGB
+        if (data.column.index === 1 && data.row.index === 2) data.cell.styles.textColor = SECONDARY_RGB
+        if (data.row.index === 4) {
+          data.cell.styles.fontStyle = 'bold'
+          data.cell.styles.fontSize = 12
+          data.cell.styles.textColor = PRIMARY_RGB
+          data.cell.styles.lineWidth = { top: 0.4 }
+          data.cell.styles.lineColor = PRIMARY_RGB
+        }
       },
     })
+    y = doc.lastAutoTable.finalY + 10
 
-    let y = doc.lastAutoTable.finalY + 10
-
-    doc.setFontSize(13)
-    doc.setTextColor(...INK_RGB)
-    doc.text('Rent Collected by Payment Method', margin, y)
+    y = startSection(`Where the Money Is — end of ${monthLabel(month)}`, y)
     autoTable(doc, {
       startY: y + 4,
-      head: [['Method', 'Amount (PHP)']],
-      body: PAYMENT_METHODS.map((m) => [m, collectedByMethod[m].toLocaleString()]),
-      foot: [['Total', collected.toLocaleString()]],
+      head: [['Place', 'Start of month', 'Rent in', 'Moved', 'Taken out', 'End of month']],
+      body: places.rows.map((p) => [p.other ? `${p.name}*` : p.name, num(p.start), dash(p.rentIn), signed(p.moved), dash(p.out), num(p.end)]),
+      foot: [['Total', num(places.total.start), dash(places.total.rentIn), '-', dash(places.total.out), num(places.total.end)]],
       theme: 'striped',
       headStyles: { fillColor: INK_RGB, textColor: 255 },
       footStyles: { fillColor: [255, 255, 255], textColor: INK_RGB, fontStyle: 'bold', lineWidth: { top: 0.4 }, lineColor: INK_RGB },
       alternateRowStyles: { fillColor: CREAM_RGB },
       styles: { fontSize: 10 },
-      columnStyles: { 1: { halign: 'right' } },
+      columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right', fontStyle: 'bold' } },
+      didParseCell: (data) => {
+        if (data.column.index >= 1) data.cell.styles.halign = 'right'
+        if (data.section === 'body' && data.column.index === 5 && places.rows[data.row.index].end < 0) data.cell.styles.textColor = SECONDARY_RGB
+      },
     })
-    y = doc.lastAutoTable.finalY + 10
+    y = doc.lastAutoTable.finalY + 4
+    doc.setFontSize(8.5)
+    doc.setTextColor(110)
+    doc.text(
+      "* Your starting balance and expenses aren't tied to Cash, GCash or Check. \"Moved\" is money shifted between places and doesn't change the total.",
+      margin,
+      y,
+      { maxWidth: contentW },
+    )
+    y += 12
 
     if (tenantStatuses.length > 0) {
+      doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(...INK_RGB)
       doc.text(`Tenant Payment Status${behindCount > 0 ? ` — ${behindCount} not fully paid` : ''}`, margin, y)
+      doc.setFont('helvetica', 'normal')
       autoTable(doc, {
         startY: y + 4,
         head: [['Tenant', 'Property', 'Status', 'Paid (PHP)', 'Balance (PHP)']],
@@ -301,6 +341,7 @@ export default function Reports() {
         styles: { fontSize: 10 },
         columnStyles: { 3: { halign: 'right' }, 4: { halign: 'right' } },
         didParseCell: (data) => {
+          if (data.column.index >= 3) data.cell.styles.halign = 'right'
           if (data.section === 'body' && data.column.index === 2) {
             const status = tenantStatuses[data.row.index].status
             data.cell.styles.fontStyle = 'bold'
@@ -314,9 +355,11 @@ export default function Reports() {
     }
 
     if (monthPayments.length > 0) {
+      doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(...PRIMARY_RGB)
       doc.text(`Payments (${monthPayments.length})`, margin, y)
+      doc.setFont('helvetica', 'normal')
       autoTable(doc, {
         startY: y + 4,
         head: [['Date', 'Tenant', 'Method', 'Amount (PHP)']],
@@ -328,14 +371,19 @@ export default function Reports() {
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
         columnStyles: { 3: { halign: 'right' } },
+        didParseCell: (data) => {
+          if (data.column.index === 3) data.cell.styles.halign = 'right'
+        },
       })
       y = doc.lastAutoTable.finalY + 10
     }
 
     if (monthExpenses.length > 0) {
+      doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(...SECONDARY_RGB)
       doc.text(`Expenses (${monthExpenses.length})`, margin, y)
+      doc.setFont('helvetica', 'normal')
       autoTable(doc, {
         startY: y + 4,
         head: [['Date', 'Description', 'Category', 'Amount (PHP)']],
@@ -347,14 +395,19 @@ export default function Reports() {
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
         columnStyles: { 3: { halign: 'right' } },
+        didParseCell: (data) => {
+          if (data.column.index === 3) data.cell.styles.halign = 'right'
+        },
       })
       y = doc.lastAutoTable.finalY + 10
     }
 
     if (monthWithdrawals.length > 0) {
+      doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(...INK_RGB)
       doc.text(`Money Withdrawn (${monthWithdrawals.length})`, margin, y)
+      doc.setFont('helvetica', 'normal')
       autoTable(doc, {
         startY: y + 4,
         head: [['Date', 'For', 'Taken from', 'Amount (PHP)']],
@@ -366,14 +419,19 @@ export default function Reports() {
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
         columnStyles: { 3: { halign: 'right' } },
+        didParseCell: (data) => {
+          if (data.column.index === 3) data.cell.styles.halign = 'right'
+        },
       })
       y = doc.lastAutoTable.finalY + 10
     }
 
     if (monthTransfers.length > 0) {
+      doc.setFont('helvetica', 'bold')
       doc.setFontSize(13)
       doc.setTextColor(...INK_RGB)
       doc.text(`Money Moved Between Cash / GCash / Check (${monthTransfers.length})`, margin, y)
+      doc.setFont('helvetica', 'normal')
       autoTable(doc, {
         startY: y + 4,
         head: [['Date', 'From', 'To', 'Note', 'Amount (PHP)']],
@@ -383,6 +441,9 @@ export default function Reports() {
         alternateRowStyles: { fillColor: CREAM_RGB },
         styles: { fontSize: 10 },
         columnStyles: { 4: { halign: 'right' } },
+        didParseCell: (data) => {
+          if (data.column.index === 4) data.cell.styles.halign = 'right'
+        },
       })
     }
 
@@ -448,9 +509,13 @@ export default function Reports() {
       .join('')
     const expensesTotalRow = `<tr><td style="${totalStyle}"></td><td style="${totalStyle}"></td><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${totalExpenses}</td></tr>`
 
-    const methodRows = PAYMENT_METHODS.map(
-      (m) => `<tr><td style="${rowStyle}">${m}</td><td style="${rowStyle}text-align:right;">${collectedByMethod[m]}</td></tr>`,
-    ).join('')
+    const placeRows = places.rows
+      .map(
+        (p) =>
+          `<tr><td style="${rowStyle}">${esc(p.other ? `${p.name}*` : p.name)}</td><td style="${rowStyle}text-align:right;">${p.start}</td><td style="${rowStyle}text-align:right;">${p.rentIn}</td><td style="${rowStyle}text-align:right;">${p.moved}</td><td style="${rowStyle}text-align:right;">${p.out}</td><td style="${rowStyle}font-weight:bold;text-align:right;">${p.end}</td></tr>`,
+      )
+      .join('')
+    const placesTotalRow = `<tr><td style="${totalStyle}">Total</td><td style="${totalStyle}text-align:right;">${places.total.start}</td><td style="${totalStyle}text-align:right;">${places.total.rentIn}</td><td style="${totalStyle}text-align:right;">${places.total.moved}</td><td style="${totalStyle}text-align:right;">${places.total.out}</td><td style="${totalStyle}text-align:right;">${places.total.end}</td></tr>`
     const withdrawalRows = monthWithdrawals
       .map(
         (w) =>
@@ -474,9 +539,11 @@ export default function Reports() {
           <tr><td colspan="4" style="font-family:Calibri;font-size:13px;color:#404943;padding:0 8px 12px;">${monthLabel(month)}</td></tr>
           ${summaryRows}
           <tr><td colspan="4" style="padding:8px;"></td></tr>
-          <tr><td colspan="2" style="${sectionStyle}">Rent Collected by Payment Method</td></tr>
-          <tr><th style="${headStyle}">Method</th><th style="${headStyle}">Amount (PHP)</th></tr>
-          ${methodRows}
+          <tr><td colspan="6" style="${sectionStyle}">Where the Money Is — end of ${monthLabel(month)}</td></tr>
+          <tr><th style="${headStyle}">Place</th><th style="${headStyle}">Start of month</th><th style="${headStyle}">Rent in</th><th style="${headStyle}">Moved</th><th style="${headStyle}">Taken out</th><th style="${headStyle}">End of month</th></tr>
+          ${placeRows}
+          ${placesTotalRow}
+          <tr><td colspan="6" style="font-family:Calibri;font-size:11px;color:#707973;padding:4px 10px;">* Starting balance and expenses aren't tied to Cash, GCash or Check. "Moved" is money shifted between places and doesn't change the total.</td></tr>
           <tr><td colspan="4" style="padding:8px;"></td></tr>
           <tr><td colspan="5" style="${sectionStyle}">Tenant Payment Status${behindCount > 0 ? ` — ${behindCount} not fully paid` : ''}</td></tr>
           <tr><th style="${headStyle}">Tenant</th><th style="${headStyle}">Property</th><th style="${headStyle}">Status</th><th style="${headStyle}">Paid (PHP)</th><th style="${headStyle}">Balance (PHP)</th></tr>
@@ -535,16 +602,6 @@ export default function Reports() {
           <Stat label="Withdrawn" value={totalWithdrawn} color="text-on-background" />
           <Stat label="Ending Balance" value={closing} color="text-on-background" />
         </div>
-        <div className="flex flex-col gap-2 pt-2">
-          <span className="text-sm font-semibold text-on-surface-variant">Rent collected by payment method</span>
-          <div className="flex flex-wrap gap-2">
-            {PAYMENT_METHODS.map((m) => (
-              <span key={m} className="inline-flex items-center rounded-full bg-surface-container-highest text-on-surface-variant font-semibold text-sm px-3.5 py-2">
-                {m}: {formatCurrency(collectedByMethod[m])}
-              </span>
-            ))}
-          </div>
-        </div>
         <p className="text-sm text-on-surface-variant">
           Money left carries into next month — {monthLabel(month)} ends at {formatCurrency(closing)}.
         </p>
@@ -552,6 +609,73 @@ export default function Reports() {
         {monthPayments.length === 0 && monthExpenses.length === 0 && (
           <p className="text-on-surface-variant text-sm">No payments or expenses logged for {monthLabel(month)} yet.</p>
         )}
+      </Card>
+
+      <Card className="flex flex-col gap-4 w-full">
+        <SectionHeader
+          title={`Where the Money Is — end of ${monthLabel(month)}`}
+          icon="payments"
+          subtitle="Start of month + rent in + moved − taken out = end of month"
+        />
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-sm text-on-surface-variant border-b border-outline-variant">
+                <th className="py-2 pr-4 font-semibold">Place</th>
+                <th className="py-2 px-3 font-semibold text-right">Start of month</th>
+                <th className="py-2 px-3 font-semibold text-right">Rent in</th>
+                <th className="py-2 px-3 font-semibold text-right">Moved</th>
+                <th className="py-2 px-3 font-semibold text-right">Taken out</th>
+                <th className="py-2 pl-3 font-semibold text-right">End of month</th>
+              </tr>
+            </thead>
+            <tbody>
+              {places.rows.map((p) => (
+                <tr key={p.name} className="border-b border-outline-variant/40">
+                  <td className="py-3 pr-4 font-semibold text-on-surface">{p.other ? `${p.name}*` : p.name}</td>
+                  <td className="py-3 px-3 text-right">{formatCurrency(p.start)}</td>
+                  <td className="py-3 px-3 text-right text-primary">{p.rentIn ? formatCurrency(p.rentIn) : '–'}</td>
+                  <td className="py-3 px-3 text-right">{p.moved ? `${p.moved > 0 ? '+' : '-'}${formatCurrency(Math.abs(p.moved))}` : '–'}</td>
+                  <td className="py-3 px-3 text-right text-secondary">{p.out ? formatCurrency(p.out) : '–'}</td>
+                  <td className={`py-3 pl-3 text-right font-bold ${p.end < 0 ? 'text-secondary' : 'text-on-surface'}`}>{formatCurrency(p.end)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold text-on-surface">
+                <td className="py-3 pr-4">Total</td>
+                <td className="py-3 px-3 text-right">{formatCurrency(places.total.start)}</td>
+                <td className="py-3 px-3 text-right text-primary">{formatCurrency(places.total.rentIn)}</td>
+                <td className="py-3 px-3 text-right">–</td>
+                <td className="py-3 px-3 text-right text-secondary">{formatCurrency(places.total.out)}</td>
+                <td className="py-3 pl-3 text-right text-primary">{formatCurrency(places.total.end)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div className="md:hidden flex flex-col divide-y divide-outline-variant/40">
+          {places.rows.map((p) => (
+            <div key={p.name} className="py-3 first:pt-0 flex flex-col gap-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-semibold text-on-surface">{p.other ? `${p.name}*` : p.name}</span>
+                <span className={`text-xl font-bold ${p.end < 0 ? 'text-secondary' : 'text-on-surface'}`}>{formatCurrency(p.end)}</span>
+              </div>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-on-surface-variant">
+                <div className="flex justify-between gap-2"><dt>Start</dt><dd className="text-on-surface">{formatCurrency(p.start)}</dd></div>
+                <div className="flex justify-between gap-2"><dt>Rent in</dt><dd className="text-primary">{p.rentIn ? formatCurrency(p.rentIn) : '–'}</dd></div>
+                <div className="flex justify-between gap-2"><dt>Moved</dt><dd className="text-on-surface">{p.moved ? `${p.moved > 0 ? '+' : '-'}${formatCurrency(Math.abs(p.moved))}` : '–'}</dd></div>
+                <div className="flex justify-between gap-2"><dt>Taken out</dt><dd className="text-secondary">{p.out ? formatCurrency(p.out) : '–'}</dd></div>
+              </dl>
+            </div>
+          ))}
+          <div className="pt-3 flex items-baseline justify-between gap-3 font-bold text-on-surface">
+            <span>Total</span>
+            <span className="text-xl text-primary">{formatCurrency(places.total.end)}</span>
+          </div>
+        </div>
+        <p className="text-sm text-on-surface-variant">
+          * Your starting balance and expenses aren't tied to Cash, GCash or Check. "Moved" is money shifted between places and doesn't change the total.
+        </p>
       </Card>
 
       {tenantStatuses.length > 0 && (
