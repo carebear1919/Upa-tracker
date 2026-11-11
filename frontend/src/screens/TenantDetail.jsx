@@ -20,7 +20,7 @@ function copyMessage(message, setCopied) {
   )
 }
 
-const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function Field({ label, children, className = '' }) {
   return (

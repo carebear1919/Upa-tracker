@@ -74,7 +74,7 @@ export default function Layout({ onLock, onLogout }) {
           {navGroups.map((group) => (
             <div key={group.label} className="flex flex-col gap-1">
               {expanded && (
-                <span className="px-4 text-xs font-bold uppercase tracking-wide text-on-surface-variant/60">
+                <span className="px-4 text-xs font-bold uppercase tracking-wide text-on-surface-variant">
                   {group.label}
                 </span>
               )}
@@ -168,7 +168,7 @@ export default function Layout({ onLock, onLogout }) {
             }
           >
             <Icon name={item.icon} className="text-[20px]" />
-            <span className="text-[10px] font-medium mt-1 leading-tight">{item.label}</span>
+            <span className="text-[11px] font-medium mt-1 leading-tight">{item.label}</span>
           </NavLink>
         ))}
       </nav>

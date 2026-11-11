@@ -3,7 +3,7 @@ import { login, signup } from '../lib/supabase.js'
 import Icon from '../components/Icon.jsx'
 import Card from '../components/Card.jsx'
 
-const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 export default function Login() {
   const [mode, setMode] = useState('login')

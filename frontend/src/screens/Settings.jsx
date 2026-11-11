@@ -6,7 +6,7 @@ import Card from '../components/Card.jsx'
 import Toast, { useToast } from '../components/Toast.jsx'
 import Onboarding from '../components/Onboarding.jsx'
 
-const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function PinField({ label, value, onChange, ...props }) {
   return (
@@ -98,7 +98,7 @@ export default function Settings({ onLock, onLogout }) {
   return (
     <>
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-on-surface mb-2">Settings</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-2">Settings</h1>
         <p className="text-on-surface-variant">Your PIN, starting balance, sample data, and a way to start fresh.</p>
       </div>
 

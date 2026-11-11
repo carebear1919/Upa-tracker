@@ -39,6 +39,9 @@
   --color-background: #f0ede4;
   --color-on-background: #1a1c1a;
   --color-surface-variant: #e3e2e0;
+  /* Tinted card backgrounds for rent that needs attention. */
+  --color-surface-urgent: #fdeceb;
+  --color-surface-soon: #f7f3e2;
 
   --font-sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
@@ -84,4 +87,42 @@ body {
   0% { opacity: 0; transform: scale(0.5) rotate(-15deg); }
   60% { opacity: 1; transform: scale(1.15) rotate(0); }
   100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* Browser surfaces themed from the palette, so nothing ships as a default. */
+html {
+  scrollbar-color: var(--color-outline-variant) transparent;
+}
+
+/* Money columns line up digit-for-digit. */
+body {
+  font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+/* One clearly visible keyboard focus ring for every control. */
+:where(a, button, summary, select, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

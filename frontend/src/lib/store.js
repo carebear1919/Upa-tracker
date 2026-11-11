@@ -627,10 +627,13 @@ export const URGENCY_STYLES = {
 
 export function formatCurrency(amount) {
   const n = Number(amount)
+  const sign = n < 0 ? '-' : ''
+  const abs = Math.abs(n)
   // Whole pesos stay clean (₱12,000); anything with cents always shows two digits (₱12,000.50).
-  return Number.isInteger(n)
-    ? `₱${n.toLocaleString('en-PH')}`
-    : `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  // The minus sign goes in front of the peso sign (-₱5,850), not between them.
+  return Number.isInteger(abs)
+    ? `${sign}₱${abs.toLocaleString('en-PH')}`
+    : `${sign}₱${abs.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 // Lets one household track a mix of rental housing and business spaces in

@@ -27,7 +27,7 @@ export default function Withdraw() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-on-background mb-2">Withdraw Money</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-2">Withdraw Money</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-gutter w-full items-start">
         <Card className="w-full">
@@ -68,7 +68,7 @@ export default function Withdraw() {
   )
 }
 
-const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function Field({ label, children, className = '' }) {
   return (

@@ -34,14 +34,14 @@ export default function Tenants() {
 
   return (
     <>
-      <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Tenants</h1>
           <p className="text-on-surface-variant">Tap a tenant to see their history, or add a new one below.</p>
         </div>
         <button
           onClick={() => setShowForm((s) => !s)}
-          className="bg-primary text-on-primary font-semibold px-6 py-3 rounded-full min-h-tap-target-min flex items-center gap-2 hover:bg-primary-container transition-colors"
+          className="bg-primary text-on-primary font-semibold px-6 py-3 rounded-full min-h-tap-target-min flex items-center justify-center gap-2 whitespace-nowrap hover:bg-primary-container transition-colors"
         >
           <Icon name="add" className="text-[20px]" />
           Add Tenant
@@ -168,16 +168,17 @@ export default function Tenants() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <PropertyPhoto photo={t.photo} size={48} />
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-lg text-on-surface truncate">{t.name}</span>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className="font-semibold text-lg text-on-surface break-words">{t.name}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Chip size="sm" tone="neutral" icon={PROPERTY_TYPE_ICON[type]} className="flex-shrink-0">
                       {type}
                     </Chip>
+                    <span className="text-on-surface-variant">{formatCurrency(t.monthlyRent)}/mo</span>
                   </div>
-                  <span className="text-on-surface-variant truncate">
+                  <span className="text-on-surface-variant break-words">
                     {t.unit ? `Unit ${t.unit} - ` : ''}
-                    {t.property} · {formatCurrency(t.monthlyRent)}/mo
+                    {t.property}
                   </span>
                 </div>
               </div>
@@ -201,7 +202,7 @@ export default function Tenants() {
   )
 }
 
-const inputCls = 'w-full min-h-tap-target-min border-2 border-outline-variant rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-tap-target-min border-2 border-outline rounded-lg px-4 text-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function Field({ label, children, className = '' }) {
   return (
@@ -215,7 +216,7 @@ function Field({ label, children, className = '' }) {
 function FormGroup({ label, children }) {
   return (
     <div className="md:col-span-2 flex flex-col gap-3 pb-4 border-b border-outline-variant/30 last:border-b-0 last:pb-0">
-      <span className="text-sm font-bold uppercase tracking-wide text-on-surface-variant/70">{label}</span>
+      <span className="text-sm font-bold uppercase tracking-wide text-on-surface-variant">{label}</span>
       {children}
     </div>
   )

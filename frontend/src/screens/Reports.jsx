@@ -11,7 +11,7 @@ import SectionHeader from '../components/SectionHeader.jsx'
 import MonthlyTrendChart from '../components/MonthlyTrendChart.jsx'
 import PieChart from '../components/PieChart.jsx'
 
-const inputCls = 'w-full min-h-[44px] border-2 border-outline-variant rounded-lg px-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'w-full min-h-[44px] border-2 border-outline rounded-lg px-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function ExpenseRow({ expense }) {
   const [editing, setEditing] = useState(false)
@@ -51,12 +51,12 @@ function ExpenseRow({ expense }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
-      <div className="min-w-0">
-        <div className="font-semibold text-on-surface truncate">{expense.description}</div>
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="min-w-0 flex-1 basis-48">
+        <div className="font-semibold text-on-surface break-words">{expense.description}</div>
         <div className="text-sm text-on-surface-variant">{expense.date} · {expense.category}</div>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 ml-auto">
         <span className="font-semibold text-secondary">{formatCurrency(expense.amount)}</span>
         {!confirmingDelete ? (
           <>
@@ -107,15 +107,15 @@ function WithdrawalRow({ withdrawal }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
-      <div className="min-w-0">
-        <div className="font-semibold text-on-surface truncate">{withdrawal.note || 'Withdrawal'}</div>
-        <div className="text-sm text-on-surface-variant flex items-center gap-2">
-          {withdrawal.date}
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="min-w-0 flex-1 basis-48">
+        <div className="font-semibold text-on-surface break-words">{withdrawal.note || 'Withdrawal'}</div>
+        <div className="text-sm text-on-surface-variant flex items-center gap-2 flex-wrap">
+          <span className="whitespace-nowrap">{withdrawal.date}</span>
           <Chip tone="neutral" size="sm">{withdrawal.method ?? 'Cash'}</Chip>
         </div>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 ml-auto">
         <span className="font-semibold text-on-surface">{formatCurrency(withdrawal.amount)}</span>
         {!confirmingDelete ? (
           <>
@@ -137,16 +137,16 @@ function TransferRow({ transfer }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
-      <div className="min-w-0">
-        <div className="font-semibold text-on-surface truncate">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="min-w-0 flex-1 basis-48">
+        <div className="font-semibold text-on-surface break-words">
           {transfer.fromMethod} → {transfer.toMethod}
         </div>
-        <div className="text-sm text-on-surface-variant truncate">
+        <div className="text-sm text-on-surface-variant break-words">
           {transfer.date}{transfer.note ? ` · ${transfer.note}` : ''}
         </div>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 ml-auto">
         <span className="font-semibold text-on-surface">{formatCurrency(transfer.amount)}</span>
         {!confirmingDelete ? (
           <IconButton icon="delete_forever" aria-label="Delete transfer" variant="danger" onClick={() => setConfirmingDelete(true)} iconClassName="text-[18px]" />
@@ -511,7 +511,7 @@ export default function Reports() {
     <>
       <div className="flex items-start justify-between mb-2 flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-on-background mb-1">Monthly Report</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Monthly Report</h1>
           <p className="text-on-surface-variant">Pick a month below, then export it as a PDF or spreadsheet.</p>
           <Link to="/payments" className="text-primary font-semibold hover:underline inline-flex items-center gap-1 mt-1">
             <Icon name="payments" className="text-[18px]" />
@@ -522,13 +522,13 @@ export default function Reports() {
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="border-2 border-outline-variant rounded-lg px-3 py-2 text-lg bg-surface-container-lowest"
+          className="border-2 border-outline rounded-lg px-3 py-2 text-lg bg-surface-container-lowest"
         />
       </div>
 
       <Card className="flex flex-col gap-4 w-full">
         <SectionHeader title={monthLabel(month)} icon="assessment" />
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-gutter">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-y-5 gap-x-4">
           <Stat label="Starting Balance" value={opening} color="text-on-background" />
           <Stat label="Rent Collected" value={collected} color="text-primary" />
           <Stat label="Expenses" value={totalExpenses} color="text-secondary" />
@@ -539,9 +539,9 @@ export default function Reports() {
           <span className="text-sm font-semibold text-on-surface-variant">Rent collected by payment method</span>
           <div className="flex flex-wrap gap-2">
             {PAYMENT_METHODS.map((m) => (
-              <Chip key={m} tone="neutral" size="md">
+              <span key={m} className="inline-flex items-center rounded-full bg-surface-container-highest text-on-surface-variant font-semibold text-sm px-3.5 py-2">
                 {m}: {formatCurrency(collectedByMethod[m])}
-              </Chip>
+              </span>
             ))}
           </div>
         </div>
@@ -713,9 +713,9 @@ export default function Reports() {
 
 function Stat({ label, value, color }) {
   return (
-    <Card variant="nested" padding="md" className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 md:px-4 md:first:pl-0 md:border-l md:first:border-l-0 border-outline-variant/40">
       <span className="text-on-surface-variant font-semibold">{label}</span>
       <span className={`text-2xl font-bold ${color}`}>{formatCurrency(value)}</span>
-    </Card>
+    </div>
   )
 }

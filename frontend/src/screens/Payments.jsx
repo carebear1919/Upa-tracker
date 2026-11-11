@@ -8,7 +8,7 @@ import IconButton from '../components/IconButton.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import PropertyPhoto from '../components/PropertyPhoto.jsx'
 
-const inputCls = 'min-h-[48px] border-2 border-outline-variant rounded-lg px-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
+const inputCls = 'min-h-[48px] border-2 border-outline rounded-lg px-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary'
 
 function PaymentRow({ payment, tenant }) {
   const [editing, setEditing] = useState(false)
@@ -49,18 +49,18 @@ function PaymentRow({ payment, tenant }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b border-outline-variant/30 last:border-0">
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 border-b border-outline-variant/30 last:border-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1 basis-48">
         <PropertyPhoto photo={tenant?.photo} size={40} />
         <div className="min-w-0">
-          <div className="font-semibold text-on-surface truncate">{tenant?.name ?? 'Unknown tenant'}</div>
-          <div className="text-sm text-on-surface-variant flex items-center gap-2">
-            {payment.datePaid}
+          <div className="font-semibold text-on-surface break-words">{tenant?.name ?? 'Unknown tenant'}</div>
+          <div className="text-sm text-on-surface-variant flex items-center gap-2 flex-wrap">
+            <span className="whitespace-nowrap">{payment.datePaid}</span>
             <Chip tone="neutral" size="sm">{payment.method ?? 'Cash'}</Chip>
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 ml-auto">
         <span className="font-semibold text-primary">{formatCurrency(payment.amount)}</span>
         {!confirmingDelete ? (
           <>
@@ -97,7 +97,7 @@ export default function Payments() {
   return (
     <>
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-on-background mb-1">Payments</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Payments</h1>
         <p className="text-on-surface-variant">Every rent payment ever logged, across all tenants. Filter below to find one.</p>
       </div>
 
@@ -157,6 +157,8 @@ export default function Payments() {
             )}
           </Card>
 
+          {/* Room so the floating button never sits on top of the last row's buttons. */}
+          <div className="h-16 md:hidden" aria-hidden="true" />
           <Link
             to="/log-payment"
             className="fixed bottom-20 md:bottom-8 right-4 md:right-8 bg-primary text-on-primary w-14 h-14 rounded-full shadow-level-2 flex items-center justify-center hover:bg-primary-container transition-colors z-40"

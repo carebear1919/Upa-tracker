@@ -20,7 +20,7 @@ const TONE_CONTAINER = {
   error: 'bg-error-container text-on-error-container',
 }
 
-const UNSELECTED = 'bg-transparent text-on-surface-variant border border-outline-variant hover:bg-surface-container-high'
+const UNSELECTED = 'bg-transparent text-on-surface-variant border border-outline hover:bg-surface-container-high'
 
 const SIZE_CLASS = {
   sm: 'text-xs px-2.5 py-1 gap-1',

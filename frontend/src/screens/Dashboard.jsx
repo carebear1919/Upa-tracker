@@ -9,11 +9,13 @@ import DueBadge from '../components/DueBadge.jsx'
 import PropertyPhoto from '../components/PropertyPhoto.jsx'
 import RemindButton from '../components/RemindButton.jsx'
 
+// Rent that needs attention gets a tinted card and a thin full outline; the
+// DueBadge carries the exact wording so color is never the only signal.
 const CARD_TINT_BY_URGENCY = {
-  overdue: 'border-secondary bg-[#fdeceb]',
-  today: 'border-secondary bg-[#fdeceb]',
-  soon: 'border-tertiary bg-[#f7f3e2]',
-  later: 'border-outline-variant bg-surface-container-lowest',
+  overdue: 'bg-surface-urgent ring-1 ring-secondary/40',
+  today: 'bg-surface-urgent ring-1 ring-secondary/40',
+  soon: 'bg-surface-soon ring-1 ring-tertiary/40',
+  later: 'bg-surface-container-lowest',
 }
 
 function StartingBalanceEditor({ settings, standalone = false }) {
@@ -45,7 +47,7 @@ function StartingBalanceEditor({ settings, standalone = false }) {
         <button
           onClick={openEditor}
           aria-label="Edit starting balance"
-          className="flex items-center justify-center w-8 h-8 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors"
+          className="flex items-center justify-center w-11 h-11 -mr-2 -mt-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors"
         >
           <Icon name="edit" className="text-[15px]" />
         </button>
@@ -61,7 +63,7 @@ function StartingBalanceEditor({ settings, standalone = false }) {
               step="0.01"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className="w-full min-h-[40px] border-2 border-outline-variant rounded-lg px-2 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"
+              className="w-full min-h-[40px] border-2 border-outline rounded-lg px-2 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"
             />
             <div className="flex justify-end gap-3 mt-1">
               <button type="button" onClick={() => setOpen(false)} className="text-sm font-semibold text-on-surface-variant hover:underline">
@@ -122,41 +124,50 @@ export default function Dashboard() {
   return (
     <>
       <div className="mb-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-2">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-1">Dashboard</h1>
         <p className="text-on-surface-variant">This month's rent, expenses, and money left at a glance.</p>
       </div>
 
       <SectionHeader title="This Month" icon="assessment" />
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter w-full">
-        <Card className="flex flex-col gap-2">
-          <span className="font-semibold text-lg text-on-surface-variant">Rent Collected</span>
-          <span className="text-2xl md:text-3xl font-bold text-primary">{formatCurrency(collected)}</span>
-          <div className="w-full bg-surface-container-highest rounded-full h-3 mt-2 overflow-hidden">
+      <Card className="flex flex-col gap-6 w-full">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold text-lg text-on-surface-variant">Money Left</p>
+            <p className="text-4xl md:text-5xl font-bold text-primary tracking-tight">{formatCurrency(balance)}</p>
+            <p className="text-sm text-on-surface-variant mt-1">Carried forward, all months</p>
+          </div>
+          <StartingBalanceEditor settings={settings} />
+        </div>
+
+        <dl className="grid grid-cols-3 divide-x divide-outline-variant/40 border-t border-outline-variant/40 pt-5">
+          <div className="pr-3 sm:pr-5">
+            <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">Rent Collected</dt>
+            <dd className="text-xl sm:text-2xl font-bold text-primary">{formatCurrency(collected)}</dd>
+          </div>
+          <div className="px-3 sm:px-5">
+            <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">Expenses</dt>
+            <dd className="text-xl sm:text-2xl font-bold text-secondary">{formatCurrency(monthExpenses)}</dd>
+          </div>
+          <div className="pl-3 sm:pl-5">
+            <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">Withdrawn</dt>
+            <dd className="text-xl sm:text-2xl font-bold text-on-background">{formatCurrency(monthWithdrawn)}</dd>
+          </div>
+        </dl>
+
+        <div className="flex flex-col gap-2">
+          <div
+            className="w-full bg-surface-container-highest rounded-full h-3 overflow-hidden"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.min(pct, 100)}
+            aria-label="Rent collected this month"
+          >
             <div className="bg-primary h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%` }} />
           </div>
-          <span className="text-sm text-on-surface-variant mt-1">{pct}% of expected ({formatCurrency(expected)})</span>
-        </Card>
-
-        <Card className="flex flex-col gap-2">
-          <span className="font-semibold text-lg text-on-surface-variant">Expenses</span>
-          <span className="text-2xl md:text-3xl font-bold text-secondary">{formatCurrency(monthExpenses)}</span>
-        </Card>
-
-        <Card className="flex flex-col gap-2">
-          <span className="font-semibold text-lg text-on-surface-variant">Withdrawn</span>
-          <span className="text-2xl md:text-3xl font-bold text-on-background">{formatCurrency(monthWithdrawn)}</span>
-          <span className="text-sm text-on-surface-variant mt-auto pt-2">Money taken out this month</span>
-        </Card>
-
-        <Card className="flex flex-col gap-2">
-          <div className="flex items-start justify-between">
-            <span className="font-semibold text-lg text-on-surface-variant">Money Left</span>
-            <StartingBalanceEditor settings={settings} />
-          </div>
-          <span className="text-2xl md:text-3xl font-bold text-on-background">{formatCurrency(balance)}</span>
-          <span className="text-on-surface-variant mt-auto pt-2">Carried forward, all months</span>
-        </Card>
-      </section>
+          <span className="text-sm text-on-surface-variant">{pct}% of the {formatCurrency(expected)} expected rent collected</span>
+        </div>
+      </Card>
 
       <SectionHeader
         title="Where the Money Is"
@@ -164,15 +175,15 @@ export default function Dashboard() {
         className="mt-2"
         action={{ label: 'Move money', to: '/move-money', icon: 'chevron_right' }}
       />
-      <Card className="w-full flex flex-col gap-3">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-gutter">
+      <Card className="w-full flex flex-col gap-4">
+        <dl className="grid grid-cols-3 divide-x divide-outline-variant/40">
           {PAYMENT_METHODS.map((m) => (
-            <Card key={m} variant="nested" padding="md" className="flex flex-col gap-1">
-              <span className="font-semibold text-on-surface-variant">{m}</span>
-              <span className="text-xl font-bold text-on-background">{formatCurrency(pots[m])}</span>
-            </Card>
+            <div key={m} className="px-3 sm:px-5 first:pl-0 last:pr-0">
+              <dt className="text-sm sm:text-base font-semibold text-on-surface-variant">{m}</dt>
+              <dd className="text-lg sm:text-xl font-bold text-on-background">{formatCurrency(pots[m])}</dd>
+            </div>
           ))}
-        </div>
+        </dl>
         {unassigned !== 0 && (
           <p className="text-sm text-on-surface-variant">
             Starting balance minus expenses ({formatCurrency(unassigned)}) isn't tied to Cash, GCash or Check. Add it to the
@@ -185,23 +196,23 @@ export default function Dashboard() {
       <section className="flex flex-col md:flex-row gap-gutter w-full">
         <Link
           to="/log-payment"
-          className="w-full min-h-tap-target-min flex-1 bg-primary text-on-primary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform"
+          className="w-full min-h-tap-target-min flex-1 bg-primary text-on-primary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-[0.98] transition-transform"
         >
           <Icon name="payments" className="text-[28px]" />
           <span className="font-semibold text-lg">Log Rent</span>
         </Link>
         <Link
           to="/add-expense"
-          className="w-full min-h-tap-target-min flex-1 bg-secondary text-on-secondary rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform"
+          className="w-full min-h-tap-target-min flex-1 bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-4 flex items-center justify-center gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
         >
-          <Icon name="receipt_long" className="text-[28px]" />
+          <Icon name="receipt_long" className="text-[28px] text-secondary" />
           <span className="font-semibold text-lg">Add Expense</span>
         </Link>
         <Link
           to="/withdraw"
-          className="w-full min-h-tap-target-min flex-1 bg-surface-container-high text-on-surface rounded-xl p-4 flex items-center justify-center gap-3 shadow-level-2 active:scale-95 transition-transform"
+          className="w-full min-h-tap-target-min flex-1 bg-surface-container-lowest text-on-surface border-2 border-outline rounded-xl p-4 flex items-center justify-center gap-3 hover:bg-surface-container-high active:scale-[0.98] transition"
         >
-          <Icon name="logout" className="text-[28px]" />
+          <Icon name="logout" className="text-[28px] text-on-surface-variant" />
           <span className="font-semibold text-lg">Withdraw</span>
         </Link>
       </section>
@@ -232,14 +243,14 @@ export default function Dashboard() {
             return (
               <div
                 key={t.id}
-                className={`shadow-level-1 rounded-xl p-4 flex flex-col gap-3 border-l-4 ${CARD_TINT_BY_URGENCY[urgency]}`}
+                className={`shadow-level-1 rounded-xl p-4 flex flex-col gap-3 ${CARD_TINT_BY_URGENCY[urgency]}`}
               >
                 <Link to={`/tenants/${t.id}`} className="flex items-center justify-between gap-3 hover:opacity-80 transition-opacity">
                   <div className="flex items-center gap-3 min-w-0">
                     <PropertyPhoto photo={t.photo} size={48} />
                     <div className="flex flex-col min-w-0">
                       <span className="font-semibold text-lg text-on-surface truncate">{t.name}</span>
-                      <span className="text-on-surface-variant truncate">
+                      <span className="text-on-surface-variant break-words">
                         {t.unit ? `Unit ${t.unit} - ` : ''}
                         {t.property}
                       </span>

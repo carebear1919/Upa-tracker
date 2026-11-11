@@ -23,19 +23,19 @@ function DashboardSlide() {
     <div className="flex flex-col items-center text-center gap-4">
       <h2 className="text-xl font-bold text-on-surface">Dashboard</h2>
       <p className="text-on-surface-variant">See rent collected, expenses, and money left at a glance.</p>
-      <div className="w-full grid grid-cols-3 gap-2">
-        <Card variant="nested" padding="md" className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold text-on-surface-variant uppercase">Collected</span>
+      <div className="w-full grid grid-cols-3 divide-x divide-outline-variant/40 text-left">
+        <div className="flex flex-col gap-1 pr-3">
+          <span className="text-xs font-semibold text-on-surface-variant">Collected</span>
           <span className="text-sm font-bold text-primary">₱24,000</span>
-        </Card>
-        <Card variant="nested" padding="md" className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold text-on-surface-variant uppercase">Expenses</span>
+        </div>
+        <div className="flex flex-col gap-1 px-3">
+          <span className="text-xs font-semibold text-on-surface-variant">Expenses</span>
           <span className="text-sm font-bold text-secondary">₱2,150</span>
-        </Card>
-        <Card variant="nested" padding="md" className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold text-on-surface-variant uppercase">Money Left</span>
+        </div>
+        <div className="flex flex-col gap-1 pl-3">
+          <span className="text-xs font-semibold text-on-surface-variant">Money Left</span>
           <span className="text-sm font-bold text-on-surface">₱56,150</span>
-        </Card>
+        </div>
       </div>
     </div>
   )

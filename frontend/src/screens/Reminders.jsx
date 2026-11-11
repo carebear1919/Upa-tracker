@@ -49,7 +49,7 @@ function MessageFormatEditor({ template }) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             rows={3}
-            className="w-full border-2 border-outline-variant rounded-lg px-4 py-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"
+            className="w-full border-2 border-outline rounded-lg px-4 py-3 text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary"
           />
           <p className="text-sm text-on-surface-variant">
             Use <code className="font-semibold">{'{name}'}</code>, <code className="font-semibold">{'{amount}'}</code>,{' '}
@@ -93,7 +93,7 @@ export default function Reminders() {
   return (
     <>
       <div className="w-full mb-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">Upcoming Reminders</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-on-background mb-2">Upcoming Reminders</h1>
         <p className="text-on-surface-variant">Manage your upcoming rent collections and tenant communications.</p>
       </div>
 
