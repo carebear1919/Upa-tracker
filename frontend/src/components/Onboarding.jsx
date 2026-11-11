@@ -96,20 +96,84 @@ function TenantsSlide() {
   )
 }
 
-function PaymentsReportsSlide() {
+const METHODS = ['Cash', 'GCash', 'Check']
+
+// Every real payment records how it was paid, so the demo asks the same
+// question with the same chips.
+function PaymentsSlide() {
+  const [method, setMethod] = useState('Cash')
+
+  return (
+    <div className="flex flex-col items-center text-center gap-4">
+      <h2 className="text-xl font-bold text-on-surface">Log Payments</h2>
+      <p className="text-on-surface-variant">Tenants pay by Cash, GCash or Check. Pick how this one came in.</p>
+      <div className="w-full flex flex-wrap justify-center gap-3">
+        {METHODS.map((m) => (
+          <Chip key={m} variant="selector" tone="primary" selected={method === m} onClick={() => setMethod(m)}>
+            {m}
+          </Chip>
+        ))}
+      </div>
+      <div className="w-full bg-surface-container-low rounded-xl p-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon name="calendar_today" className="text-primary text-[18px] flex-shrink-0" />
+          <span className="text-sm font-semibold text-on-surface">Aug 1 · Rent · {method}</span>
+        </div>
+        <span className="font-semibold text-primary">₱8,000</span>
+      </div>
+      <p className="text-sm text-on-surface-variant">Paying less than the full rent is fine — it shows as partly paid.</p>
+    </div>
+  )
+}
+
+const START_PLACES = { Cash: 7000, GCash: 12000, Check: 15000 }
+
+// Moving money only changes where it sits — the total never changes. The demo
+// lets her see that for herself before she does it for real.
+function MoneySlide() {
+  const [moved, setMoved] = useState(false)
+  const places = moved ? { Cash: 12000, GCash: 12000, Check: 10000 } : START_PLACES
+  const total = Object.values(places).reduce((sum, n) => sum + n, 0)
+
+  return (
+    <div className="flex flex-col items-center text-center gap-4">
+      <h2 className="text-xl font-bold text-on-surface">Where the Money Is</h2>
+      <p className="text-on-surface-variant">
+        See how much is in Cash, GCash and Check. Cashed a check? Move it — nothing is lost.
+      </p>
+      <dl className="w-full grid grid-cols-3 divide-x divide-outline-variant/40 text-left">
+        {METHODS.map((m, i) => (
+          <div key={m} className={`flex flex-col gap-1 ${i === 0 ? 'pr-3' : i === 1 ? 'px-3' : 'pl-3'}`}>
+            <dt className="text-xs font-semibold text-on-surface-variant">{m}</dt>
+            <dd className="text-sm font-bold text-on-surface">₱{places[m].toLocaleString()}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-sm font-semibold text-on-surface">
+        Total ₱{total.toLocaleString()}
+        {moved && <span className="text-primary"> · same as before</span>}
+      </p>
+      <button
+        onClick={() => setMoved((v) => !v)}
+        className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary rounded-xl py-3 font-semibold hover:bg-primary-container transition-colors"
+      >
+        <Icon name={moved ? 'check_circle' : 'chevron_right'} className={`text-[18px] ${moved ? 'animate-[onboarding-check-in_0.4s_ease-out]' : ''}`} />
+        {moved ? 'Moved! Tap to undo' : 'Try: Move ₱5,000 from Check to Cash'}
+      </button>
+      <p className="text-sm text-on-surface-variant">Taking money out for yourself? Use Withdraw on the Home screen.</p>
+    </div>
+  )
+}
+
+function ReportsSlide() {
   const [exported, setExported] = useState(false)
 
   return (
     <div className="flex flex-col items-center text-center gap-4">
-      <h2 className="text-xl font-bold text-on-surface">Payments & Reports</h2>
-      <p className="text-on-surface-variant">Log rent as it comes in, then export a report anytime.</p>
-      <div className="w-full bg-surface-container-low rounded-xl p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon name="calendar_today" className="text-primary text-[18px]" />
-          <span className="text-sm font-semibold text-on-surface">Aug 1 · Rent</span>
-        </div>
-        <span className="font-semibold text-primary">₱8,000</span>
-      </div>
+      <h2 className="text-xl font-bold text-on-surface">Reports</h2>
+      <p className="text-on-surface-variant">
+        Each month's report shows rent, expenses, money withdrawn and the money in each place. Export it anytime.
+      </p>
       <button
         onClick={() => setExported(true)}
         className="w-full flex items-center justify-center gap-2 bg-primary text-on-primary rounded-xl py-3 font-semibold hover:bg-primary-container transition-colors"
@@ -205,7 +269,7 @@ function BalanceStep({ onDone }) {
   )
 }
 
-const SLIDES = [WelcomeSlide, DashboardSlide, TenantsSlide, PaymentsReportsSlide, RemindersSlide]
+const SLIDES = [WelcomeSlide, DashboardSlide, TenantsSlide, PaymentsSlide, MoneySlide, ReportsSlide, RemindersSlide]
 
 // Shown once automatically after a new account's first PIN is set (see
 // App.jsx), and replayable anytime from Settings — the "seen it" flag lives
