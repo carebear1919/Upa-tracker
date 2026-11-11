@@ -48,7 +48,9 @@ export default function LogPayment() {
       method,
     })
     notify('Payment saved')
-    navigate(`/tenants/${tenantId}`)
+    // Came from a tenant's page: go back to it. Otherwise back to the Dashboard,
+    // where the next unpaid tenant is waiting.
+    navigate(preselect ? `/tenants/${tenantId}` : '/')
   }
 
   return (

@@ -12,8 +12,12 @@ import { notify } from '../lib/notice.js'
 export default function MoveMoney() {
   const { payments, withdrawals, transfers, expenses, settings } = useStore()
   const navigate = useNavigate()
-  const [from, setFrom] = useState('Check')
-  const [to, setTo] = useState('Cash')
+  // Start from where the money mostly is, heading to the next place.
+  const [from, setFrom] = useState(() => {
+    const { pots } = balancesByMethod(payments, withdrawals, transfers, currentMonth(), expenses, settings.openingBalance)
+    return [...PAYMENT_METHODS].sort((a, b) => pots[b] - pots[a])[0]
+  })
+  const [to, setTo] = useState(() => PAYMENT_METHODS.find((m) => m !== from) ?? 'Cash')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [note, setNote] = useState('')
